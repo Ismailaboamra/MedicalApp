@@ -1,0 +1,823 @@
+define(['angularAMD'], function (angularAMD) {
+  'use strict';
+
+  angularAMD.constant('FieldsEnumConstant', {
+    pagesEnums: {
+      1000: 'ApplicationFlow.PersonalDetails',
+      2000: 'ApplicationFlow.StudyDetails',
+      3000: 'ApplicationFlow.AdditionalDetails',
+      4000: 'ApplicationFlow.DocumentAttachments',
+      5000: 'ApplicationFlow.BankAccountDetails',
+    },
+    //      PersonalDetails (1000)
+    1000: {
+      1001: {
+        desc: 'IsStudentInterestedInLoan',
+        title:
+          'אם לא תימצא זכאי למענק אלא להלוואה, האם תהיה מעוניין בקבלת הלוואה?',
+      },
+      1002: {
+        desc: 'SocialSecurityID',
+        title: 'מספר זהות',
+      },
+      1003: {
+        desc: 'FirstName',
+        title: 'שם פרטי',
+      },
+      1004: {
+        desc: 'LastName',
+        title: 'שם משפחה',
+      },
+      1005: {
+        desc: 'FormerLastName',
+        title: 'שם משפחה קודם',
+      },
+      1006: {
+        desc: 'BirthYear',
+        title: 'שנת לידה',
+      },
+      1007: {
+        desc: 'GenderDetails',
+        title: 'מין הסטודנט',
+      },
+      1008: {
+        desc: 'CityDetails',
+        title: 'עיר מגורים',
+      },
+      1009: {
+        desc: 'Neighborhood',
+        title: 'שם השכונה',
+      },
+      1010: {
+        desc: 'IsAddressInShikumSchunot',
+        title: 'האם השכונה או היישוב בו אתה מתגורר נכללת בפרויקט שיקום שכונות?',
+      },
+      1011: {
+        desc: 'StreetDetails',
+        title: 'רחוב',
+      },
+      1012: {
+        desc: 'StreetNumber',
+        title: 'מספר בית',
+      },
+      1013: {
+        desc: 'FlatNumber',
+        title: 'מספר דירה',
+      },
+      1014: {
+        desc: 'Entrance',
+        title: 'כניסה',
+      },
+      1015: {
+        desc: 'PostOfficeBox',
+        title: 'ת.ד',
+      },
+      1016: {
+        desc: 'MobilePostOffice',
+        title: 'ד.נ',
+      },
+      1017: {
+        desc: 'Email',
+        title: 'כתובת דוא"ל של הסטודנט',
+      },
+      1018: {
+        desc: 'LandlineNumber',
+        title: 'מספר טלפון קווי של הסטודנט',
+      },
+      1019: {
+        desc: 'MobileNumber',
+        title: 'מספר טלפון נייד של הסטודנט',
+      },
+      1020: {
+        desc: 'IsStudentBtlEmploymentIncapacity',
+        title: 'האם נקבעה לך דרגת אי כושר עבודה מבט"ל בגובה 75% ומעלה?',
+      },
+      1021: {
+        desc: 'MaritalStatusDetails',
+        title: 'מצב משפחתי',
+      },
+      1022: {
+        desc: 'HasChildrenAgeUnder21',
+        title: 'האם יש לך ילדים?',
+      },
+      1023: {
+        desc: 'NumberOfChildrenAgeUnder21',
+        title: 'מספר ילדים',
+      },
+      1024: {
+        desc: 'ChildrenFirstName',
+        title: 'פרטי של הילד',
+      },
+      1025: {
+        desc: 'ChildrenLastName',
+        title: 'שם משפחה של הילד',
+      },
+      1026: {
+        desc: 'ChildrenSocialSecurityID',
+        title: 'מספר זהות של הילד',
+      },
+      1027: {
+        desc: 'ChildrenBirthDate',
+        title: 'תאריך לידה',
+      },
+      1028: {
+        desc: 'ChildrenID',
+        title: 'GUID',
+      },
+      1029: {
+        desc: 'HasSpouse',
+        title: 'האם יש לך ב"ז?',
+      },
+      1030: {
+        desc: 'SpouseFirstname',
+        title: 'שם פרטי של הב"ז',
+      },
+      1031: {
+        desc: 'SpouseLastName',
+        title: 'שם משפחה של הב"ז',
+      },
+      1032: {
+        desc: 'SpouseSocialSecurityID',
+        title: 'מספר זהות של הב"ז',
+      },
+      1033: {
+        desc: 'SpouseEmploymentDetails',
+        title: 'האם ב"ז עובד/ת?',
+      },
+      1034: {
+        desc: 'IsSpouseAStudent',
+        title: 'האם הב"ז לומד/ת לתואר אקדמי?',
+      },
+      1035: {
+        desc: 'SpouseStudyInstituteDetails',
+        title: 'מהו שם המוסד לתואר ראשון השנה של ב"ז?',
+      },
+      1036: {
+        desc: 'IsStudentOrSpouseWelfareTreated',
+        title: 'האם אתה או/ו הב"ז נמצא/ים בטיפול שירותי הרווחה בדרגת זכאות א?',
+      },
+      1037: {
+        desc: 'IsStudentOrSpouseTorahScholarship',
+        title:
+          'האם אתה או ב"ז קיבלתם "קצבה"- מלגת לימודים ועידוד- השתלבות אברכים וכוללים בתעסוקה ("מלגת הבטחת הכנסה לאברכים") מאגף למוסדות תורניים במשרד החינוך למשך 12 חודשים מתוך 18 חודשים שקדמו לתחילת לימודיך לתואר?',
+      },
+      1038: {
+        desc: 'IsStudentOrSpouseHavtachatHachnasa',
+        title:
+          'האם אתה או ב"ז קיבלתם קיצבת הבטחת הכנסה מהמוסד לבט"ל במשך 12 חודשים מתוך 18 חודשים שקדמו לתחילת לימודיך לתואר?',
+      },
+      1039: {
+        desc: 'IsStudentHavtachatTashlumMezonot',
+        title:
+          'האם קיבלת תשלום לפי חוק המזונות (אבטחת תשלום) תשל"ב- 1972 מהמוסד לביטוח לאומי במשך 12 חודשים מתוך 18 החודשים שקדמו לתחילת לימודיך לתואר?',
+      },
+      1040: {
+        desc: 'SpouseBirthDate',
+        title: 'תאריך לידה של הב"ז',
+      },
+      1041: {
+        desc: 'HasSiblings',
+        title: 'האם יש לך אחים?',
+      },
+      1042: {
+        desc: 'NumberOfSiblings',
+        title: 'מספר האחים',
+      },
+      1043: {
+        desc: 'SiblingBirthDate',
+        title: 'תאריך לידה של האח/ות',
+      },
+      1044: {
+        desc: 'SiblingFirstName',
+        title: 'פרטי של האח/ות',
+      },
+      1045: {
+        desc: 'SiblingLastName',
+        title: 'שם משפחה של האח/ות',
+      },
+      1046: {
+        desc: 'SiblingSocialSecurityID',
+        title: 'מספר הזהות של האח/ות',
+      },
+      1047: {
+        desc: 'SiblingDisabilityPercentageDetails',
+        title: 'דרגת אחוז הנכות שנקבעה לאח/ות',
+      },
+      1048: {
+        desc: 'SiblingID',
+        title: 'GUID',
+      },
+      1049: {
+        desc: 'IsSiblingAStudent',
+        title: 'האם האח/ות סטודנט בגיל 22 ומעלה ללא ילדים?',
+      },
+      1050: {
+        desc: 'InTouchWithParentA',
+        title: 'האם נותק לחלוטין הקשר בינך לבין אמך?',
+      },
+      1052: {
+        desc: 'ParentAFirstName',
+        title: 'שם פרטי של האם',
+      },
+      1053: {
+        desc: 'ParentALastName',
+        title: 'שם משפחה של האם',
+      },
+      1054: {
+        desc: 'ParentASocialSecurityID',
+        title: 'מספר זהות של האם',
+      },
+      1055: {
+        desc: 'ParentAEmploymentDetails',
+        title: 'עיסוק האם',
+      },
+      1056: {
+        desc: 'ParentADisabilityPercentageDetails',
+        title: 'מגבלה רפואית / אחוזי נכות - של האם',
+      },
+      1057: {
+        desc: 'ParentAEducation',
+        title: 'תיאור השכלה של האם',
+      },
+      1058: {
+        desc: 'ParentAIsWelfareTreated',
+        title: 'האם אמך בטיפול שירותי הרווחה?',
+      },
+      1059: {
+        desc: 'InTouchWithParentB',
+        title: 'האם נותק לחלוטין הקשר בינך לבין אביך?',
+      },
+      /*1060: {
+                desc: 'ParentBResidenceDetails',
+                title: 'מהו בית המגורים הקבוע של אביך?'
+            },*/
+      1061: {
+        desc: 'ParentBFirstName',
+        title: 'שם פרטי של האב',
+      },
+      1062: {
+        desc: 'ParentBLastName',
+        title: 'שם משפחה של האב',
+      },
+      1063: {
+        desc: 'ParentBSocialSecurityID',
+        title: 'מספר זהות של האב',
+      },
+      1064: {
+        desc: 'ParentBEmploymentDetails',
+        title: 'עיסוק האב',
+      },
+      1065: {
+        desc: 'ParentBDisabilityPercentageDetails',
+        title: 'מגבלה רפואית / אחוזי נכות - של האב',
+      },
+      1066: {
+        desc: 'ParentBEducation',
+        title: 'תיאור השכלה של האב',
+      },
+      1067: {
+        desc: 'ParentBIsWelfareTreated',
+        title: 'האם אביך בטיפול שירותי הרווחה?',
+      },
+      1068: {
+        desc: 'StudentFamilyWelfareTreatedDetails',
+        title: 'האם אתה או/ו משפחתך נמצא/ים בטיפול שירותי הרווחה?',
+      },
+      1069: {
+        desc: 'ParentsResidenceDetails',
+        title: 'בית המגורים הקבוע של הסטודנט בתקופת הלימודים',
+      },
+      1070: {
+        desc: 'SpouseDisabilityPercentageDetails',
+        title: 'מגבלה רפואית של הב״ז',
+      },
+      1071: {
+        desc: 'ChildDisabilityPercentageDetails',
+        title: 'מגבלה רפואית של הילד',
+      },
+    },
+    //      StudyDetails (2000)
+    2000: {
+      2001: {
+        desc: 'StudyPoints',
+        title: 'מהו מספר נקודות זכות?',
+      },
+      2002: {
+        desc: 'CurrentYearStudyCourses',
+        title: 'חוגי הלימוד שבהם אתה לומד השנה',
+      },
+      2003: {
+        desc: 'StudyCourses',
+        title: 'מספר חוגי הלימוד',
+      },
+      2004: {
+        desc: 'Major',
+        title: 'מהי המגמה שאותה אתה לומד?',
+      },
+      2005: {
+        desc: 'Minor',
+        title: 'מהי התת מגמה שאותה אתה לומד?',
+      },
+      2006: {
+        desc: 'StudyTypeDetails',
+        title: 'לאיזה תואר אתה לומד?',
+      },
+      2007: {
+        desc: 'InstituteDetails',
+        title: 'מהו מוסד הלימודים?',
+      },
+      2008: {
+        desc: 'FacultyDetails',
+        title: 'שם הפקולטה',
+      },
+      2009: {
+        desc: 'PriorUniversityTitleDetails',
+        title: 'האם אתה בעל תואר קודם?',
+      },
+      2010: {
+        desc: 'CurrentYearNumberDetails',
+        title: 'מהי שנת הלימודים לתואר השנה?',
+      },
+      2011: {
+        desc: 'IsStudentANewImmigrant8YearsMax',
+        title: 'האם עלית מהקווקז או מאתיופיה בשמונה שנים האחרונות?',
+      },
+      2012: {
+        desc: 'TuitionFeesOutsidefundingDetails',
+        title: 'מהו היקף המימון של שכ"ל ממקורות חיצוניים?',
+      },
+      2013: {
+        desc: 'BasicTuitionFeesCurrentYearDetails',
+        title: 'היקף סכום החיוב של שכ"ל הבסיסי שבו חוייבת השנה בש"ח',
+      },
+      2014: {
+        desc: 'OpenUniversityAnnualBAStudiesScope',
+        title: 'מהו היקף הלימודים לתואר ראשון בתכנית שנתית שם?',
+      },
+    },
+    //        AdditionalDetails(3000)
+    3000: {
+      3001: {
+        desc: 'IsLivedInIsrael',
+        title: 'האם בתקופת לימודיך בתיכון התגוררת בארץ?',
+      },
+      3002: {
+        desc: 'HighschoolCityDetails',
+        title: 'מהי העיר בה נמצא התיכון?',
+      },
+      3003: {
+        desc: 'HighschoolName',
+        title: 'מהו שם התיכון?',
+      },
+      3004: {
+        desc: 'IsHighSchoolAddressInShikumSchunot',
+        title:
+          'האם בתקופת לימודיך בתיכון התגוררת בשכונה או יישוב השייכים לפרוייקט שיקום שכונות?',
+      },
+      3005: {
+        desc: 'ShikumSchunotCity',
+        title: 'מהו שם העיר בה התגוררת?',
+      },
+      3006: {
+        desc: 'ShikumSchunotStreet',
+        title: 'מהו שם הרחוב בו התגוררת?',
+      },
+      3007: {
+        desc: 'ShikumSchunotNeighborhood',
+        title: 'מהו שם השכונה בה התגוררת?',
+      },
+      3008: {
+        desc: 'PastServiceDetails',
+        title: 'סוג שירות',
+      },
+      3009: {
+        desc: 'StartDate',
+        title: 'פרטי גיוס',
+      },
+      3010: {
+        desc: 'ReleaseDate',
+        title: 'פרטי גיוס',
+      },
+      3011: {
+        desc: 'IDFReserveStartDate',
+        title: 'תקופת שירות מילואים',
+      },
+      3012: {
+        desc: 'IDFReserveEndDate',
+        title: 'תקופת שירות מילואים',
+      },
+      3013: {
+        desc: 'IDFReserveID',
+        title: 'GUID',
+      },
+      3014: {
+        desc: 'IsStudentLearningDisability',
+        title: 'האם יש לך ליקוי למידה?',
+      },
+      3015: {
+        desc: 'IsStudentEntitledBtlDisability',
+        title: 'אתה זכאי לקצבת נכות כללי מהמוסד לביטוח לאומי?',
+      },
+      3016: {
+        desc: 'StudentDisabilityPercentageDetails',
+        title: 'האם יש לך אחוזי נכות?',
+      },
+      3017: {
+        desc: 'StudentIDFIDNumber',
+        title: 'מספר אישי בצה"ל',
+      },
+      3018: {
+        desc: 'IsStudentInIDFReserveService',
+        title: 'האם אתה עושה מילואים?',
+      },
+    },
+    4000: {
+      4001: {
+        attachmentTypeCode: 4001,
+        title: 'אישור על גובה שכר לימוד של הסטודנט',
+        desc: 'AttachmentStudentBasicTuitionFeesCurrentYear',
+        modal: {
+          title: 'אישור על גובה שכר לימוד של הסטודנט',
+          body:
+            'אישור המפרט את סכום שכר הלימוד השנתי, כולל פירוט באחוזים של היקף מערכת הלימודים השנתית.',
+          image: 'AttachmentStudentBasicTuitionFeesCurrentYear.jpg',
+        },
+      },
+      4002: {
+        attachmentTypeCode: 4002,
+        title: 'צילום תעודת זהות הסטודנט',
+        desc: 'AttachmentSocialSecurityID',
+        modal: {
+          title: 'צילום תעודת הזהות סטודנט',
+          image: 'AttachmentSocialSecurityID.png',
+        },
+      },
+      4003: {
+        attachmentTypeCode: 4003,
+        title: 'צילום ספח תעודת זהות הסטודנט',
+        desc: 'AttachmentSocialSecurityIDLeaflet',
+      },
+      4004: {
+        attachmentTypeCode: 4004,
+        title: 'טופס רישום לימודים למוסד אקדמי',
+        desc: 'AttachmentSchoolRegistration',
+        modal: {
+          title: 'טופס רישום לימודים למוסד אקדמי',
+          body:
+            'אישור לימודים בציון שם התואר, הפקולטה, ושנת הלימודים לתואר.<br/>' +
+            'סטודנטים באוניברסיטה הפתוחה הלומדים לתואר ראשון נדרשים לצרף תכנית לימודים שנתית בהיקף של 24 נקודות זכות או חמישה קורסים אקדמיים. <br/>' +
+            'לתואר שני נדרשת תכנית לימודים בהיקף של 16 נקודות זכות או ארבעה קורסים אקדמיים. <br/>' +
+            'סטודנטים במכללות אזוריות נדרשים לצרף אישור לימודים עם חסות אקדמית של האוניברסיטה הנותנת חסות למכללה.<br/>',
+          image: 'AttachmentSchoolRegistration.jpg',
+        },
+      },
+      4005: {
+        attachmentTypeCode: 4005,
+        title: 'צילום תעודת זהות או הדרכון של הב"ז',
+        desc: 'AttachmentSpouceSocialSecurityID',
+      },
+      4006: {
+        attachmentTypeCode: 4006,
+        title: 'צילום ספח תעודת הזהות או הדרכון של הב"ז',
+        desc: 'AttachmentSpouseSocialSecurityIDLeaflet',
+      },
+      4007: {
+        attachmentTypeCode: 4007,
+        title: 'צילום תעודת שחרור מצה"ל / שירות לאומי',
+        desc: 'AttachmentIDFDIschargeOrSherutLeumi',
+        modal: {
+          title: 'צילום תעודת שחרור מצה"ל / שירות לאומי',
+          body:
+            'סטודנטים ששירתו במילואים יותר מ-13 ימים בתקופת שנת הלימודים הקודמת נדרשים לצרף אישור מקצין הקישור של היחידה או מקצין העיר. במקרה של שירות צבאי/לאומי/אזרחי נדרש אישור על תקופת השירות.',
+        },
+      },
+      4008: {
+        attachmentTypeCode: 4008,
+        title: 'טופס היקף לימודים באוניברסיטה הפתוחה',
+        desc: 'AttachmentOpenUniversityAnnualBAStudiesScope',
+        modal: {
+          title: 'טופס היקף לימודים באוניברסיטה הפתוחה',
+          body:
+            'אישור לימודים בציון שם התואר, הפקולטה, ושנת הלימודים לתואר.<br/>' +
+            'סטודנטים באוניברסיטה הפתוחה הלומדים לתואר ראשון נדרשים לצרף תכנית לימודים שנתית בהיקף של 24 נקודות זכות או חמישה קורסים אקדמיים. <br/>' +
+            'לתואר שני נדרשת תכנית לימודים בהיקף של 16 נקודות זכות או ארבעה קורסים אקדמיים. <br/>' +
+            'סטודנטים במכללות אזוריות נדרשים לצרף אישור לימודים עם חסות אקדמית של האוניברסיטה הנותנת חסות למכללה.<br/>',
+          image: 'AttachmentOpenUniversityAnnualBAStudiesScope.jpg',
+        },
+      },
+      4009: {
+        attachmentTypeCode: 4009,
+        title: 'אישור תקופת מילואים',
+        desc: 'AttachmentIDFReserve',
+        modal: {
+          title: 'אישור תקופת מילואים',
+          body:
+            'סטודנטים ששירתו במילואים יותר מ-13 ימים בתקופת שנת הלימודים הקודמת נדרשים לצרף אישור מקצין הקישור של היחידה או מקצין העיר. במקרה של שירות צבאי/לאומי/אזרחי נדרש אישור על תקופת השירות',
+          image: 'AttachmentIDFReserve.jpg',
+        },
+      },
+      4010: {
+        attachmentTypeCode: 4010,
+        title: 'אישור על לימודים במוסד להשכלה גבוהה השנה של הב"ז',
+        desc: 'AttachmentSpouseCurrentYearSchoolRegistration',
+        modal: {
+          title: 'אישור על לימודים במוסד להשכלה גבוהה השנה של הב"ז',
+          body:
+            'אישור לימודים בציון שם התואר, הפקולטה, ושנת הלימודים לתואר.<br/>' +
+            'סטודנטים באוניברסיטה הפתוחה הלומדים לתואר ראשון נדרשים לצרף תכנית לימודים שנתית בהיקף של 24 נקודות זכות או חמישה קורסים אקדמיים. <br/>' +
+            'לתואר שני נדרשת תכנית לימודים בהיקף של 16 נקודות זכות או ארבעה קורסים אקדמיים. <br/>' +
+            'סטודנטים במכללות אזוריות נדרשים לצרף אישור לימודים עם חסות אקדמית של האוניברסיטה הנותנת חסות למכללה.<br/>',
+          image: 'AttachmentSpouseCurrentYearSchoolRegistration.jpg',
+        },
+      },
+      4011: {
+        attachmentTypeCode: 4011,
+        title: 'אישור (תצהיר משפטי) על ניתוק הקשר עם ההורים',
+        desc: 'AttachmentStudentIncommunicadoWithParents',
+        modal: {
+          title: 'אישור (תצהיר משפטי) על ניתוק הקשר עם ההורים',
+          body:
+            'סטודנטים ללא ילדים המצהירים שנותק הקשר בינם ובין אחד מהורים נדרשים לצרף תצהיר משפטי של רשם בית משפט או נוטריון (עו"ד). במקרה של ניתוק קשר משני ההורים, בדיקת הזכאות והניקוד תיעשה על סמך נתוני הסטודנטים בלבד',
+          image: 'AttachmentStudentIncommunicadoWithParents.jpg',
+        },
+      },
+      4012: {
+        attachmentTypeCode: 4012,
+        title: 'אישור (דו"ח סוציאלי) משירותי הרווחה',
+        desc: 'AttachmentStudentFamilyWelfareTreated',
+        modal: {
+          title: 'אישור (דו"ח סוציאלי) משירותי הרווחה',
+          body:
+            'סטודנטים המצהירים כי משפחתם נמצאת בטיפול שירותי הרווחה נדרשים לצרף אישור מלשכת הרווחה כי המשפחה מוכרת ומטופלת.',
+          image: 'AttachmentStudentFamilyWelfareTreated.jpg',
+        },
+      },
+      4013: {
+        attachmentTypeCode: 4013,
+        title: 'אישורים המעידים על היעדר הכנסה מעבודה של משפחת הסטודנט',
+        desc: 'AttachmentHavtachatHachnasa',
+        modal: {
+          title: 'אישורים המעידים על היעדר הכנסה מעבודה של משפחת הסטודנט',
+          body:
+            'במצב של היעדר הכנסה של אחד או שני ההורים, נדרש אישור מהמוסד לביטוח לאומי על זכאות לקבלת קצבת אבטלה, הבטחת הכנסה, השלמת הכנסה, קצבת נכות או קצבת שארים',
+        },
+      },
+      4014: {
+        attachmentTypeCode: 4014,
+        title: 'אישור תשלום לפי חוק המזונות',
+        desc: 'AttachmentBTLAllimonyBenefits',
+      },
+      4015: {
+        attachmentTypeCode: 4015,
+        title: 'אישור על אחוזי נכות רפואית של האם',
+        desc: 'AttachmentStudentParentABTLCommityDisabilityApproval',
+        modal: {
+          title: 'אישור על אחוזי נכות רפואית של האם',
+          body:
+            'במצב של נכות רפואית מעל 20% של אחד מבני המשפחה, נדרש אישור מטעם המוסד לביטוח לאומי או משרד הביטחון, בציון שיעור אחוזי הנכות ותאריך הזכאות. אם אובחנו ליקויי למידה נדרש אישור מטעם מוסד הלימודים על הזכאות לקבלת הקלות לימוד.',
+          image: 'AttachmentStudentParentABTLCommityDisabilityApproval.jpg',
+        },
+      },
+      4016: {
+        attachmentTypeCode: 4016,
+        title: 'אישור על אחוזי נכות רפואית של האב',
+        desc: 'AttachmentStudentParentBBTLCommityDisabilityApproval',
+        modal: {
+          title: 'אישור על אחוזי נכות רפואית של האב',
+          body:
+            'במצב של נכות רפואית מעל 20% של אחד מבני המשפחה, נדרש אישור מטעם המוסד לביטוח לאומי או משרד הביטחון, בציון שיעור אחוזי הנכות ותאריך הזכאות. אם אובחנו ליקויי למידה נדרש אישור מטעם מוסד הלימודים על הזכאות לקבלת הקלות לימוד.',
+          image: 'AttachmentStudentParentBBTLCommityDisabilityApproval.jpg',
+        },
+      },
+      4017: {
+        attachmentTypeCode: 4017,
+        title: 'אישור על פרטי תעסוקה של האם',
+        desc: 'AttachmentStudentParentABTLUnEmploymentLetter',
+        modal: {
+          title: 'אישור על פרטי תעסוקה של האם',
+          body:
+            'במצב של היעדר הכנסה של הסטודנטים או הוריהם, נדרש אישור מהמוסד לביטוח לאומי על זכאות לקבלת קצבת אבטלה, הבטחת הכנסה, השלמת הכנסה, קצבת נכות או קצבת שארים.',
+          image: 'AttachmentStudentParentABTLUnEmploymentLetter.jpg',
+        },
+      },
+      4018: {
+        attachmentTypeCode: 4018,
+        title: 'אישור על פרטי תעסוקה של האב',
+        desc: 'AttachmentStudentParentBBTLUnEmploymentLetter',
+        modal: {
+          title: 'אישור על פרטי תעסוקה של האב',
+          body:
+            'במצב של היעדר הכנסה של הסטודנטים או הוריהם, נדרש אישור מהמוסד לביטוח לאומי על זכאות לקבלת קצבת אבטלה, הבטחת הכנסה, השלמת הכנסה, קצבת נכות או קצבת שארים.',
+          image: 'AttachmentStudentParentBBTLUnEmploymentLetter.jpg',
+        },
+      },
+      4019: {
+        attachmentTypeCode: 4019,
+        title: 'מסמך הוכחת חשבון בנק של הסטודנטים',
+        desc: 'AttachmentStudentBankDetails',
+        modal: {
+          title: 'מסמך הוכחת חשבון בנק',
+          body: 'צילום המחאה המציין שם בעל החשבון, מספר חשבון בנק, מספר סניף',
+        },
+      },
+      4020: {
+        attachmentTypeCode: 4020,
+        title: 'אישור שיקום שכונות',
+        desc: 'AttachmentShikumSchunot',
+        modal: {
+          title: 'אישור שיקום שכונות',
+          body:
+            'סטודנטים המתגוררים שנה אחת לפחות בשכונת שיקום נדרשים להחתים את מנהל צוות ההיגוי החברתי בשכונת השיקום. <br/> ' +
+            'סטודנטים המתגוררים ביישובים הנכללים ברשימת היישובים המסווגים באשכולות 1–6 של הלמ"ס נדרשים לצרף צילום תעודת זהות, כולל ספח ובו כתובת המגורים',
+        },
+      },
+      4021: {
+        attachmentTypeCode: 4021,
+        title: 'צילום תעודת הזהות או הדרכון של האם',
+        desc: 'AttachmentStudentParentASocialSecurityID',
+      },
+      4022: {
+        attachmentTypeCode: 4022,
+        title: 'צילום תעודת הזהות או הדרכון של האב',
+        desc: 'AttachmentStudentParentBSocialSecurityID',
+      },
+      4023: {
+        attachmentTypeCode: 4023,
+        title: 'אישור על לימודים במוסד להשכלה גבוהה השנה של האח/ות',
+        desc: 'AttachmentSiblingSchoolRegistration',
+        modal: {
+          title: 'אישור על לימודים במוסד להשכלה גבוהה השנה של האח/ות',
+          body:
+            'סטודנטים ללא ילדים אשר להם אחים סטודנטים מגיל 22 נדרשים לצרף אישור לימודיהם של האחים בשנת הלימודים הנוכחית במוסד להשכלה גבוהה, לתואר ראשון או שני (כולל מכינה קדם אקדמית והנדסאים), וכן צילום תעודת הזהות של האחים ובו תאריכי הלידה שלהם.',
+          image: 'AttachmentSiblingSchoolRegistration.jpg',
+        },
+      },
+      4024: {
+        attachmentTypeCode: 4024,
+        title: 'צילום תעודת הזהות של האח/ות',
+        desc: 'AttachmentStudentSiblingSocialSecurityID',
+        modal: {
+          title: 'צילום תעודת הזהות של האח/ות',
+          body:
+            'סטודנטים ללא ילדים אשר להם אחים סטודנטים מגיל 22 נדרשים לצרף אישור לימודיהם של האחים בשנת הלימודים הנוכחית במוסד להשכלה גבוהה, לתואר ראשון או שני (כולל מכינה קדם אקדמית והנדסאים), וכן צילום תעודת הזהות של האחים ובו תאריכי הלידה שלהם.',
+        },
+      },
+      4025: {
+        attachmentTypeCode: 4025,
+        title: 'צילום ספח תעודת הזהות של האח/ות',
+        desc: 'AttachmentStudentSiblingSocialSecurityIDLeaflet',
+        modal: {
+          title: 'צילום ספח תעודת הזהות של האח/ות',
+          body:
+            'סטודנטים ללא ילדים אשר להם אחים סטודנטים מגיל 22 נדרשים לצרף אישור לימודיהם של האחים בשנת הלימודים הנוכחית במוסד להשכלה גבוהה, לתואר ראשון או שני (כולל מכינה קדם אקדמית והנדסאים), וכן צילום תעודת הזהות של האחים ובו תאריכי הלידה שלהם.',
+        },
+      },
+      4026: {
+        attachmentTypeCode: 4026,
+        title: 'אישור על אחוזי נכות רפואית של האח/ות',
+        desc: 'AttachmentStudentSiblingSocialSecurityCommityDisabilityApproval',
+        modal: {
+          title: 'אישור על אחוזי נכות רפואית של האח/ות',
+          body:
+            'במצב של נכות רפואית מעל 20% של אחד מבני המשפחה, נדרש אישור מטעם המוסד לביטוח לאומי או משרד הביטחון, בציון שיעור אחוזי הנכות ותאריך הזכאות. אם אובחנו ליקויי למידה נדרש אישור מטעם מוסד הלימודים על הזכאות לקבלת הקלות לימוד.',
+          image:
+            'AttachmentStudentSiblingSocialSecurityCommityDisabilityApproval.jpg',
+        },
+      },
+      4027: {
+        attachmentTypeCode: 4027,
+        title: 'אישור על ליקויי למידה של הסטודנט',
+        desc: 'AttachmentStudentLearningDisability',
+        modal: {
+          title: 'אישור על ליקויי למידה של הסטודנט',
+          body:
+            'במצב של נכות רפואית מעל 20% של אחד מבני המשפחה, נדרש אישור מטעם המוסד לביטוח לאומי או משרד הביטחון, בציון שיעור אחוזי הנכות ותאריך הזכאות. אם אובחנו ליקויי למידה נדרש אישור מטעם מוסד הלימודים על הזכאות לקבלת הקלות לימוד.',
+          image: 'AttachmentStudentLearningDisability.jpg',
+        },
+      },
+      4028: {
+        attachmentTypeCode: 4028,
+        title: 'אישור תעסוקה של בן/בת הזוג',
+        desc: 'AttachmentStudentSpouseBTLUnemploymentLetter',
+        modal: {
+          title: 'אישור תעסוקה של בן/בת הזוג',
+          body:
+            'במצב של היעדר הכנסה של בן/בת הזוג, נדרש אישור מהמוסד לביטוח לאומי על זכאות לקבלת קצבת אבטלה, הבטחת הכנסה, השלמת הכנסה, קצבת נכות או קצבת שארים.',
+          image: 'AttachmentStudentSpouseBTLUnemploymentLetter.jpg',
+        },
+      },
+      4029: {
+        attachmentTypeCode: 4029,
+        title: 'אישור אי כושר עבודה של הסטודנט',
+        desc: 'AttachmentStudentBtlEmploymentIncapacity',
+      },
+      4030: {
+        attachmentTypeCode: 4030,
+        title: 'אישור על טיפול שירותי רווחה של הסטודנט או של הב"ז',
+        desc: 'AttachmentStudentOrSpouseWelfareTreated',
+        modal: {
+          title: 'אישור על טיפול שירותי רווחה של הסטודנט או של הב"ז',
+          body:
+            'סטודנטים המצהירים כי משפחתם נמצאת בטיפול שירותי הרווחה נדרשים לצרף אישור מלשכת הרווחה כי המשפחה מוכרת ומטופלת.',
+          image: 'AttachmentStudentFamilyWelfareTreated.jpg',
+        },
+      },
+      4031: {
+        attachmentTypeCode: 4031,
+        title: 'אישור על טיפול שירותי רווחה של האם',
+        desc: 'AttachmentStudentParentAWelfareTreated',
+        modal: {
+          title: 'אישור על טיפול שירותי רווחה של האם',
+          body:
+            'סטודנטים המצהירים כי משפחתם נמצאת בטיפול שירותי הרווחה נדרשים לצרף אישור מלשכת הרווחה כי המשפחה מוכרת ומטופלת.',
+          image: 'AttachmentStudentParentAWelfareTreated.jpg',
+        },
+      },
+      4032: {
+        attachmentTypeCode: 4032,
+        title: 'אישור על טיפול שירותי רווחה של האב',
+        desc: 'AttachmentStudentParentBWelfareTreated',
+        modal: {
+          title: 'אישור על טיפול שירותי רווחה של האב',
+          body:
+            'סטודנטים המצהירים כי משפחתם נמצאת בטיפול שירותי הרווחה נדרשים לצרף אישור מלשכת הרווחה כי המשפחה מוכרת ומטופלת.',
+          image: 'AttachmentStudentParentBWelfareTreated.jpg',
+        },
+      },
+      4033: {
+        attachmentTypeCode: 4033,
+        title: 'אישור על אחוזי נכות רפואית של הסטודנט',
+        desc: 'AttachmentStudentDisabilityPercentage',
+        modal: {
+          title: 'אישור על אחוזי נכות רפואית של הסטודנט',
+          body:
+            'במצב של נכות רפואית מעל 20% של אחד מבני המשפחה, נדרש אישור מטעם המוסד לביטוח לאומי או משרד הביטחון, בציון שיעור אחוזי הנכות ותאריך הזכאות. אם אובחנו ליקויי למידה נדרש אישור מטעם מוסד הלימודים על הזכאות לקבלת הקלות לימוד.',
+          image: 'AttachmentStudentDisabilityPercentage.jpg',
+        },
+      },
+      4034: {
+        attachmentTypeCode: 4034,
+        title: 'אישור על אחוזי נכות רפואית של הב״ז',
+        desc: 'AttachmentSpouseDisabilityPercentage',
+        modal: {
+          title: 'אישור על אחוזי נכות רפואית של הב״ז',
+          body: null,
+          image: 'AttachmentSpouseDisabilityPercentage.jpg',
+        },
+      },
+      4035: {
+        attachmentTypeCode: 4035,
+        title: 'אישור על אחוזי נכות רפואית של הילד',
+        desc: 'AttachmentChildDisabilityPercentage',
+        modal: {
+          title: 'אישור על אחוזי נכות רפואית של הילד',
+          body: null,
+          image: 'AttachmentChildDisabilityPercentage.jpg',
+        },
+      },
+      4036: {
+        attachmentTypeCode: 4036,
+        title: 'טופס רישום לימודים עדכני',
+        desc: 'AttachmentCurrentSchoolRegistration',
+        modal: {
+          title: 'טופס רישום לימודים עדכני',
+          body: null,
+          image: 'AttachmentCurrentSchoolRegistration.jpg',
+        },
+      },
+      4037: {
+        attachmentTypeCode: 4037,
+        title: 'טופס ערעור',
+        desc: 'AttachmentStudentAppeal',
+        modal: {
+          title: 'טופס ערעור',
+          body: null,
+          image: 'AttachmentStudentAppeal.jpg',
+        },
+      },
+      4038: {
+        attachmentTypeCode: 4038,
+        title: 'בית המגורים הקבוע של הסטודנט בתקופת הלימודים',
+        desc: 'AttachmentParentsResidenceDetails',
+      },
+    },
+    5000: {
+      5002: {
+        desc: 'StudentBankDetails',
+        title: 'מסמך הוכחת חשבון בנק של הסטודנטים',
+      },
+      5003: {
+        desc: 'BankName',
+        title: 'שם הבנק',
+      },
+      5004: {
+        desc: 'BankBranchName',
+        title: 'מספר סניף',
+      },
+      5005: {
+        desc: 'BankAccountNumber',
+        title: 'מספר חשבון בנק',
+      },
+    },
+  });
+});

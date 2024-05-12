@@ -1,0 +1,28 @@
+define(['app'], function (app) {
+  'use strict';
+
+  var injectParams = [];
+  var bcCompareTo = function () {
+    return {
+      require: 'ngModel',
+      scope: {
+        compareTo: '=bcCompareTo',
+      },
+
+      link: function (scope, elm, attrs, ctrl) {
+        ctrl.$parsers.unshift(function (viewValue, $scope) {
+          var noMatch = viewValue != scope.compareTo;
+          ctrl.$setValidity('noMatch', !noMatch);
+          return noMatch ? noMatch : !noMatch;
+        });
+
+        scope.$watch('compareTo', function (value) {
+          ctrl.$setValidity('noMatch', value === ctrl.$viewValue);
+        });
+      },
+    };
+  };
+
+  bcCompareTo.$inject = injectParams;
+  app.directive('bcCompareTo', bcCompareTo);
+});

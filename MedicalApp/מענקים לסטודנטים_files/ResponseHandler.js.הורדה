@@ -1,0 +1,110 @@
+define(['angularAMD'], function (angularAMD) {
+  'use strict';
+
+  var injectParams = ['$log', '$injector', 'toastr', 'GlobalMethods'];
+  var ResponseHandler = function ($log, $injector, toastr, GlobalMethods) {
+    return {
+      errorHandler: errorHandler,
+    };
+
+    function errorHandler(res) {
+      var errorId = !!res.data.Error ? res.data.Error.Id : res.status;
+      var ModalManager = $injector.get('ModalManager');
+
+      switch (errorId) {
+        case 404:
+          $log.debug('SERVER ERROR', res.data.Message);
+          ModalManager.showModal('Error_Modal');
+          break;
+        case 555:
+          $log.debug('REDIRECT TO ENUM:', res.data.Error.Description);
+          ModalManager.showModal(
+            'FieldError_Modal',
+            +res.data.Error.Description,
+            'missing'
+          );
+          break;
+        case 777:
+          $log.debug('REDIRECT TO ENUM:', res.data.Error.Description);
+          ModalManager.showModal(
+            'FieldError_Modal',
+            +res.data.Error.Description,
+            'validation'
+          );
+          break;
+        case 444:
+          $log.debug('SEND REQUEST ERROR', res.data.Error.Description);
+          switch (res.data.Error.Description) {
+            case '10078':
+              ModalManager.showModal('Error_Modal', {
+                body: 'טופס הבקשה נשלח, אין אפשרות לבצע שינויים כעת',
+              });
+              break;
+            case '10091':
+              ModalManager.showModal('Error_Modal', {
+                body: 'שלום רב, פרטי הסטודנט אינם מופיעים במערכת.מצב זה ייתכן במידה ולא בוצעה הרשמה או טרם חלפו 10 ימי עסקים מהמועד בו בוצע הרישום. במידה וחלפו יותר מ10 ימי עסקים ממועד ביצוע הרישום הראשוני למערכת , יש לפנות לבירור מול מוקד התמיכה בטלפון: 1700-505885.',
+              });
+              break;
+            case '10098':
+            case '10105':
+            case '10152':
+              ModalManager.showModal('Error_Modal', {
+                title: 'שליחת ערעור',
+                body: 'הערעור בטיפול.',
+              });
+              break;
+            case '10129':
+              ModalManager.showModal('Error_Modal', {
+                title: 'הגשת ערעור',
+                body: 'המועד האחרון להגשת הערעור עבר, לא ניתן להגיש ערעור כעת.',
+              });
+              break;
+            case '10149':
+              ModalManager.showModal('Error_Modal', {
+                title: 'שליחת ערעור',
+                body: 'לא ניתן להגיש ערעור.',
+              });
+              break;
+            case '10164':
+              ModalManager.showModal('Error_Modal', {
+                body: 'מייל קיים אצל משתמש אחר',
+              });
+              break;
+            case '10166':
+              ModalManager.showModal('Error_Modal', {
+                body: 'משתמש קיים - בעת פתיחת המערכת ניתן יהיה להכנס ולמלא את הבקשה',
+              });
+              break;
+            case '10172':
+              ModalManager.showModal('Error_Modal', {
+                body: 'סטודנט יקר, זמן פתיחת הבקשות עבר לשנה זו',
+              });
+              break;
+            default:
+              ModalManager.showModal('Error_Modal');
+          }
+          break;
+        case 999:
+          switch (res.data.Error.Description) {
+            case '10079':
+              ModalManager.showModal('Error_Modal', {
+                body: 'סטודנט/ית יקר/ה, המערכת לא הייתה פעילה לזמן ממושך. על מנת להתחבר למערכת יש לבצע כניסה מחדש',
+              });
+              GlobalMethods.cleanCookie('auth');
+              GlobalMethods.logout();
+              break;
+            default:
+              $log.debug('GENERAL ERROR', res.data.Error);
+              toastr.warning(
+                'אנא נסה שוב במועד מאוחר יותר',
+                'הנתונים לא נשמרו.'
+              );
+          }
+          break;
+      }
+    }
+  };
+
+  ResponseHandler.$inject = injectParams;
+  angularAMD.service('ResponseHandler', ResponseHandler);
+});

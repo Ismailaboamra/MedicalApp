@@ -1,0 +1,391 @@
+define(['angularAMD', 'services/TransformRequest'], function (angularAMD) {
+  'use strict';
+
+  var injectParams = [
+    '$http',
+    '$q',
+    'GlobalVariables',
+    '$log',
+    'StudentInfo',
+    'TransformRequest',
+    'ResponseHandler',
+  ];
+  var DataService = function (
+    $http,
+    $q,
+    GlobalVariables,
+    $log,
+    StudentInfo,
+    TransformRequest,
+    ResponseHandler
+  ) {
+    var URL = GlobalVariables.dataServiceURL;
+
+    var requestObject = {
+      url: '',
+      method: 'POST',
+      data: '',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    return {
+      SystemCheck: SystemCheck,
+
+      GetPersonalDetails: GetPersonalDetails,
+      GetPersonalDetailsPageData: GetPersonalDetailsPageData,
+
+      GetCities: GetCities,
+      GetStreets: GetStreets,
+      GetMinors: GetMinors,
+      GetMajors: GetMajors,
+      GetInstitutes: GetInstitutes,
+      //GetFamilyWelfareTreatedDetails: GetFamilyWelfareTreatedDetails,
+      GetColleges: GetColleges,
+      ViewStudentAttachment: ViewStudentAttachment,
+      RemoveDocumentAttachmentsStudent: RemoveDocumentAttachmentsStudent,
+      UpdateDocumentAttachmentDetails: UpdateDocumentAttachmentDetails,
+
+      GetRequestDetails: GetRequestDetails,
+      MoveToArchive: MoveToArchive,
+      SendAppeal: SendAppeal,
+      GetAppealAttachmentID: GetAppealAttachmentID,
+      GetMessages: GetMessages,
+      SendRequest: SendRequest,
+      GetSystemMessages: GetSystemMessages,
+
+      GetLoginPageData: GetLoginPageData,
+      Logout: Logout,
+
+      GetStudyDetails: GetStudyDetails,
+      GetStudyDetailsPageData: GetStudyDetailsPageData,
+
+      GetAdditionalDetails: GetAdditionalDetails,
+      //GetAdditionalDetailsPageData: GetAdditionalDetailsPageData,
+
+      GetDocumentAttachmentsPageData: GetDocumentAttachmentsPageData,
+      GetOverviewPageData: GetOverviewPageData,
+      Update: Update,
+
+      GetStudentApprovedAmount: GetStudentApprovedAmount,
+      GetStudentBankAccountDetails: GetStudentBankAccountDetails,
+      GetBanksList: GetBanksList,
+      GetBankBranches: GetBankBranches,
+      SendBankDetails: SendBankDetails,
+
+      GetScoringReasons: GetScoringReasons,
+    };
+
+    function SystemCheck() {
+      return $http.get(URL + 'Systemcheck');
+    }
+
+    function Logout() {
+      return $http.get(URL + 'Logout');
+    }
+
+    function GetRequestApplicableDates() {
+      return $http.get(URL + 'GetRequestApplicableDates');
+    }
+
+    function GetRequestApplicableDates() {
+      return $http.get(URL + 'GetRequestApplicableDates');
+    }
+
+    function GetStudentNewsMessages() {
+      return $http.get(URL + 'GetStudentNewsMessages');
+    }
+
+    /* ---------- banks ---------*/
+    // Get the branches for a specific bank
+    function GetBankBranches(params) {
+      return $http.post(URL + 'GetBankBranchName', params);
+    }
+
+    // Get the student bank details (bank code, branch code, attchments by request)
+    function GetStudentBankAccountDetails() {
+      var params = {
+        AttachmentTypeCode: [4019],
+      };
+      params = angular.extend(params, StudentInfo.getStudentRequestParams());
+      return $http.post(URL + 'GetStudentBankAccountDetails', params);
+    }
+
+    // Get bank names & codes
+    function GetBanksList() {
+      return $http.post(URL + 'GetBankNames');
+    }
+
+    // Get Student Amount that approved
+    function GetStudentApprovedAmount() {
+      var params = StudentInfo.getStudentRequestParams();
+      return $http.post(URL + 'GetStudentApprovedAmount', params);
+    }
+
+    // Send the bank details
+    function SendBankDetails(params) {
+      params = angular.extend(params, StudentInfo.getStudentRequestParams());
+      return $http.post(URL + 'SendStudentBankAccountDetails', params);
+    }
+
+    /* ------------------------------*/
+
+    function GetOutsideFundingDetails() {
+      return $http.get(URL + 'GetOutsideFundingDetails');
+    }
+
+    function GetBasicTuitionFeesDetails() {
+      return $http.get(URL + 'GetBasicTuitionFeesDetails');
+    }
+
+    function GetDisabilityPercentageDetails() {
+      return $http.get(URL + 'GetDisabilityPercentageDetails');
+    }
+
+    function GetInstitutes() {
+      return $http.get(URL + 'GetInstitutes');
+    }
+
+    /* function GetFamilyWelfareTreatedDetails() {
+            return $http.get(URL + 'GetFamilyWelfareTreatedDetails');
+        } */
+
+    function GetColleges() {
+      return $http.get(URL + 'GetColleges');
+    }
+
+    function GetFaculties() {
+      return $http.get(URL + 'GetFaculties');
+    }
+
+    function GetMajors() {
+      return $http.get(URL + 'GetMajors');
+    }
+
+    function GetSystemMessages() {
+      return $http.post(URL + 'GetSystemMessages', {
+        SSN: '999999998',
+      });
+    }
+
+    function GetCities(params) {
+      return $http.post(URL + 'GetCities', params);
+    }
+
+    function GetStreets(params) {
+      return $http.post(URL + 'GetStreets', params);
+    }
+
+    function GetMinors(params) {
+      return $http.post(URL + 'GetMinors', params);
+    }
+
+    function GetRequestDetails(params) {
+      var defer = $q.defer();
+
+      $http
+        .post(
+          URL + 'GetRequestDetails',
+          angular.extend(params, {
+            FirstName: StudentInfo.getStudentInfo().FirstName,
+            LastName: StudentInfo.getStudentInfo().LastName,
+          })
+        )
+        .then(function (res) {
+          if (!res.data.Success) {
+            ResponseHandler.errorHandler(res);
+            defer.reject(false);
+          }
+
+          defer.resolve(res);
+        })
+        .catch(function (err) {
+          defer.reject(err);
+        });
+
+      return defer.promise;
+    }
+
+    function GetDocumentAttachmentsPageData() {
+      return $http.post(
+        URL + 'GetDocumentAttachments',
+        StudentInfo.getStudentRequestParams()
+      );
+    }
+
+    function GetPersonalDetails() {
+      return $http.post(
+        URL + 'GetPersonalDetails',
+        StudentInfo.getStudentRequestParams()
+      );
+    }
+
+    function GetStudyDetails() {
+      return $http.post(
+        URL + 'GetStudyDetails',
+        StudentInfo.getStudentRequestParams()
+      );
+    }
+
+    function GetAdditionalDetails() {
+      return $http.post(
+        URL + 'GetAdditionalDetails',
+        StudentInfo.getStudentRequestParams()
+      );
+    }
+
+    function GetMessages(params) {
+      return $http.post(
+        URL + 'GetMessages',
+        angular.extend(params, StudentInfo.getStudentRequestParams())
+      );
+    }
+
+    function SendRequest(params) {
+      return $http.post(
+        URL + 'SendRequest',
+        angular.extend(params, StudentInfo.getStudentRequestParams())
+      );
+    }
+
+    function MoveToArchive(params) {
+      requestObject.url = URL + 'MoveToArchive';
+      requestObject.data = JSON.stringify(
+        angular.extend(params, StudentInfo.getStudentRequestParams())
+      );
+      requestObject.transformRequest = TransformRequest.MoveToArchiveTransform;
+      return $http(requestObject);
+    }
+
+    function GetAppealAttachmentID() {
+      var params = StudentInfo.getStudentRequestParams();
+      return $http.post(URL + 'GetAppealAttachmentID', params);
+    }
+
+    function SendAppeal(data) {
+      // no attachment
+      return $http.post(URL + 'SendAppeal', data, requestObject.headers);
+    }
+
+    function ViewStudentAttachment(params) {
+      requestObject.url = URL + 'ViewStudentAttachment';
+      requestObject.data = JSON.stringify(
+        angular.extend(params, StudentInfo.getStudentRequestParams())
+      );
+      requestObject.transformRequest =
+        TransformRequest.StudentAttachmentTransform;
+      return $http(requestObject);
+    }
+
+    function RemoveDocumentAttachmentsStudent(params) {
+      requestObject.url = URL + 'RemoveDocumentAttachmentsStudent';
+      requestObject.data = JSON.stringify(
+        angular.extend(params, StudentInfo.getStudentRequestParams())
+      );
+      requestObject.transformRequest =
+        TransformRequest.StudentAttachmentTransform;
+      return $http(requestObject);
+    }
+
+    function UpdateDocumentAttachmentDetails(params) {
+      requestObject.url = URL + 'UpdateDocumentAttachmentDetails';
+      requestObject.data = JSON.stringify(
+        angular.extend(params, StudentInfo.getStudentRequestParams())
+      );
+      requestObject.transformRequest =
+        TransformRequest.StudentAttachmentTransform;
+      return $http(requestObject);
+    }
+
+    function GetLoginPageData() {
+      return $q
+        .all([GetRequestApplicableDates(), GetStudentNewsMessages()])
+        .then(function (results) {
+          return {
+            GetRequestApplicableDates: results[0],
+            StudentNews: results[1].data.Success
+              ? results[1].data.Payload.lStudentNewsMessages
+              : [],
+          };
+        });
+    }
+
+    function GetOverviewPageData() {
+      return $q
+        .all([
+          GetMessages({
+            ConversationDetails: {
+              IsArchive: false,
+            },
+          }),
+        ])
+        .then(function (results) {
+          return {
+            GetMessages: results[0],
+          };
+        });
+    }
+
+    function GetPersonalDetailsPageData() {
+      return $q
+        .all([
+          //GetDisabilityPercentageDetails(),
+          GetInstitutes(),
+          //GetFamilyWelfareTreatedDetails()
+        ])
+        .then(function (results) {
+          return {
+            //GetDisabilityPercentageDetails: results[0],
+            GetInstitutes: results[0],
+            //GetFamilyWelfareTreatedDetails: results[2]
+          };
+        });
+    }
+
+    /* function GetAdditionalDetailsPageData() {
+            return $q.all([
+                GetDisabilityPercentageDetails(),
+            ]).then(function (results) {
+                return {
+                    GetDisabilityPercentageDetails: results[0]
+                };
+            });
+        } */
+
+    function GetStudyDetailsPageData() {
+      return $q
+        .all([
+          GetOutsideFundingDetails(),
+          GetBasicTuitionFeesDetails(),
+          GetInstitutes(),
+          GetFaculties(),
+        ])
+        .then(function (results) {
+          return {
+            GetOutsideFundingDetails: results[0],
+            GetBasicTuitionFeesDetails: results[1],
+            GetInstitutes: results[2],
+            GetFaculties: results[3],
+          };
+        });
+    }
+
+    function Update(pageName, params) {
+      requestObject.url = URL + 'Update' + pageName;
+      requestObject.data = JSON.stringify(
+        angular.extend(params, StudentInfo.getStudentRequestParams())
+      );
+      requestObject.transformRequest = TransformRequest[pageName];
+      return $http(requestObject);
+    }
+
+    function GetScoringReasons() {
+      var params = StudentInfo.getStudentRequestParams();
+      return $http.post(URL + 'GetScoringReasons', params);
+    }
+  };
+
+  DataService.$inject = injectParams;
+  angularAMD.service('DataService', DataService);
+});

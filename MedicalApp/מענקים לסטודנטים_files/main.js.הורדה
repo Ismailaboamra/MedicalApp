@@ -1,0 +1,89 @@
+require.config({
+    baseUrl: "js",
+    paths: {
+        /**
+         * Vendor files (Bower)
+         */
+        'angular': 'libs/angular/angular.min',
+        'angularAMD': 'libs/angularAMD/angularAMD.min',
+        'angularRoute': 'libs/angular-route/angular-route.min',
+        'angularCookies': 'libs/angular-cookies/angular-cookies',
+        'angularUiRouter': 'libs/angular-ui-router/release/angular-ui-router.min',
+        'angularMessages': 'libs/angular-messages/angular-messages.min',
+        'angularAnimate': 'libs/angular-animate/angular-animate.min',
+        'angularRecaptcha': 'libs/angular-recaptcha/release/angular-recaptcha.min',
+        'angularTouch': 'libs/angular-touch/angular-touch.min',
+        'jquery': 'libs/jquery/dist/jquery.min',
+        'dropzone': 'libs/dropzone/dist/dropzone-amd-module', //has been edit
+        'uiBootstrap': 'libs/angular-bootstrap/ui-bootstrap.min',
+        'uiBootstrapTpls': 'libs/angular-bootstrap/ui-bootstrap-tpls.min',
+        'ngDialog': 'libs/ng-dialog/js/ngDialog.min',
+        'angularToastr': 'libs/angular-toastr/dist/angular-toastr.min',
+        'angularAria': 'libs/angular-aria/angular-aria.min',
+        'angularSanitize': 'libs/angular-sanitize/angular-sanitize.min',
+        'lodash': 'libs/lodash/dist/lodash.min',
+        'i18nHebrew': 'libs/angular-i18n/angular-locale_he',
+		'easyticker': 'libs/jquery-easy-ticker/jquery.easy-ticker',
+
+        /**
+         * Application GlobalObjects Files
+         */
+        'ResponseHandler': 'globalObjects/ResponseHandler',
+        'GlobalMethods': 'globalObjects/GlobalMethods',
+        'GlobalVariables': 'globalObjects/GlobalVariables',
+        'GlobalRegexes': 'globalObjects/GlobalRegexes.constant',
+        'FieldsEnumConstant': 'globalObjects/FieldsEnum.constant',
+        'LanguageManager': 'globalObjects/LanguageManager',
+        'ModalManager': 'globalObjects/ModalManager',
+        'StudentInfo': 'globalObjects/StudentInfo',
+        'ModalComponents': 'globalObjects/ModalComponents',
+
+        /**
+         * Application Config and Run functions
+         */
+        'appConfig': 'app.config',
+        'appRun': 'app.run',
+
+        /**
+         * Controllers
+         */
+        'RootCtrl': 'controllers/Root.controller',
+        'LoginCtrl': 'controllers/Login.controller',
+        'ApplicationFlowCtrl': 'controllers/ApplicationFlow.controller',
+        'OverviewCtrl': 'controllers/ApplicationFlowControllers/Overview.controller',
+        'PersonalDetailsCtrl': 'controllers/ApplicationFlowControllers/PersonalDetails.controller',
+        'StudyDetailsCtrl': 'controllers/ApplicationFlowControllers/StudyDetails.controller',
+        'AdditionalDetailsCtrl': 'controllers/ApplicationFlowControllers/AdditionalDetails.controller',
+        'DocumentAttachmentsCtrl': 'controllers/ApplicationFlowControllers/DocumentAttachments.controller',
+        'BankAccountDetailsCtrl': 'controllers/ApplicationFlowControllers/BankAccountDetails.controller',
+
+        /**
+         * Services
+         */
+        'DataService': 'services/DataService.service',
+        'UpdatedFieldsManager': 'managers/UpdatedFieldsManager.service',
+        'HttpInterceptor': 'services/HttpInterceptor.interceptor'
+    },
+
+    shim: {
+        'angular': {
+            exports: 'angular'
+        },
+        'angularAMD': ['angular'],
+        'angularRoute': ['angular'],
+        'angularCookies': ['angular'],
+        'angularUiRouter': ['angular'],
+        'angularMessages': ['angular'],
+        'angularRecaptcha': ['angular'],
+        'angularTouch': ['angular'],
+        'angularAnimate': ['angular'],
+        'i18nHebrew': ['angular'],
+        'uiBootstrap': ['angular'],
+        'uiBootstrapTpls': ['uiBootstrap'],
+        'angularToastr': ['angular'],
+        'angularSanitize': ['angular'],
+        'angularAria': ['angular']
+    },
+
+    deps: ['app']
+});

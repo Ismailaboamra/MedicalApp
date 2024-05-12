@@ -1,0 +1,15 @@
+<svg width="65" height="65" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+ <g class="currentLayer">
+  <title>Layer 1</title>
+  <image xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAZCAYAAADNAiUZAAABGUlEQVRIS+2W203DQBREz1QAHQAVQAfQAVABKYEOCBWQVEDSQeggVEA6ADoIFQwatEYmL4FjS3x4v1ay9x7P7JXvyPYZ8ABc0P2aA9ey/QIcA6OOmYfALTAP1MC9pGHHUGxH6XkP7cTpnfaWe24FLElVof8HbUXihiJ9936Z0jfSvg3WN9K+Du48v2rvWFJmXaerDs0QT3oYA8sV6lLS2nC3nZTx16SRoHADTDJPD4DZliJTSYPaDzv7OHLa0JJwBt8ToF7E9mMeAidF/RWQZHEEvJX9TNJHE/ga1HZseAUWwFNRFjcSNSaSpk1A9TOboHdFSfVeLBlJet4XVp3/AbWdxBaVWYENJb23BdsGvSydHGWN7us3H/gJoTniS62sMF4AAAAASUVORK5CYII=" id="svg_1" height="35" width="37" y="16" x="14"/>
+ </g>
+ <g>
+  <title>Layer 2</title>
+  <rect fill="none" y="0" x="0" height="100%" width="100%" id="backgroundrect"/>
+ </g>
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
+ </g>
+</svg>

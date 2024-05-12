@@ -1,0 +1,32 @@
+define(['app',
+        'directives/bc-dropzone'
+       ], function (app) {
+    'use strict';
+
+    var injectParams = ['GlobalRegexes', 'GlobalMethods', 'FieldsEnumConstant', 'pageDataObj', '$log', '$stateParams'];
+    var DocumentAttachmentsCtrl = function (GlobalRegexes, GlobalMethods, FieldsEnumConstant, pageDataObj, $log, $stateParams) {
+
+        var vm = this;
+
+        vm.title = 'המסמכים הנדרשים';
+        vm.pageStatusHeader = {
+            title: 'במסך זה מוצגים שדות להעלאת מסמכים, יש להעלות את כל המסמכים הנדרשים.',
+            content: 'לתשומת ליבך- ניתן להוסיף קבצים מסוג PDF\\JPG\\PNG בלבד, בגודל של עד 2 מגה בלבד'
+        };
+
+        vm.fieldToScroll = $stateParams.fieldId;
+
+        vm.pageObject = {
+            pageName: 'DocumentAttachments',
+        };
+
+        vm.DocumentAttachments = pageDataObj.data.Payload.lStudentAttachments;
+        vm.documentAttachmentsObject = FieldsEnumConstant[4000];
+
+        $log.debug('pageAutofill', vm.DocumentAttachments);
+    };
+
+    DocumentAttachmentsCtrl.$inject = injectParams;
+    app.controller('DocumentAttachmentsCtrl', DocumentAttachmentsCtrl);
+
+});

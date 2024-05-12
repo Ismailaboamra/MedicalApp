@@ -1,0 +1,418 @@
+define(['app', 'dropzone'], function (app, Dropzone) {
+  var injectParams = [
+    'GlobalVariables',
+    'GlobalMethods',
+    '$log',
+    'StudentInfo',
+    '$timeout',
+    'ModalManager',
+    'DataService',
+    'ResponseHandler',
+  ];
+  var bcDropzone = function (
+    GlobalVariables,
+    GlobalMethods,
+    $log,
+    StudentInfo,
+    $timeout,
+    ModalManager,
+    DataService,
+    ResponseHandler
+  ) {
+    return {
+      restrict: 'AE',
+      template: '<div ng-transclude></div>',
+      transclude: true,
+      scope: {
+        pageCurrentObj: '=',
+        formCurrentObj: '=',
+        formValidationObj: '=',
+        dropzone: '=',
+        reloadCaptcha: '=',
+        maxFiles: '=',
+        sended: '&',
+        added: '&',
+        completed: '&',
+        error: '&',
+        canUploadAttachment: '=',
+        requestStatus: '=',
+      },
+      link: function (scope, element, attrs, ctrls) {
+        scope.formCurrentObj.dropzoneFilesHasChanged = false;
+
+        try {
+          Dropzone;
+        } catch (error) {
+          throw new Error('Dropzone.js not loaded.');
+        }
+
+        var config = {
+          url: urlByDzType(scope.pageCurrentObj.dropzoneType || 'general'),
+          maxFiles: scope.maxFiles ? scope.maxFiles : 10,
+          maxFilesize:
+            scope.pageCurrentObj.dropzoneType == 'registration' ? 1 : 2,
+          acceptedFiles: '.jpg, .jpeg, .png, .pdf',
+          autoProcessQueue: isDropzoneAutoProccess(
+            scope.pageCurrentObj.dropzoneType
+          ), //scope.pageCurrentObj.dropzoneType == 'appeal' ? false : true,
+          uploadMultiple: true,
+          parallelUploads: 1, // scope.pageCurrentObj.dropzoneType == 'appeal' ? 10 :
+          dictDefaultMessage: 'גרור או לחץ <br> להעלאת הקובץ',
+          dictMaxFilesExceeded: 'לא ניתן להעלות יותר קבצים',
+          dictRemoveFile: 'לחץ להסרת קובץ זה',
+          dictFileTooBig: 'גודל הקובץ חורג מהגודל המקסימלי המותר',
+          dictResponseError: 'אחד השדות שמילאת ו/או המסמך המצורף אינו תקין',
+          dictCancelUploadConfirmation: 'האם אתה בטוח רוצה לבטל את העלאה?',
+          dictCancelUpload: 'לחץ לביטול העלאה',
+          dictInvalidFileType: 'לא ניתן להעלות סוג קובץ זה',
+          addRemoveLinks: scope.requestStatus === 0 ? true : false,
+          init: dzInitilize,
+        };
+
+        var dropzone = new Dropzone(element[0], config);
+
+        function urlByDzType(type) {
+          switch (type) {
+            case 'registration':
+              return GlobalVariables.userRegistrationURL;
+            default:
+              return GlobalVariables.fileUploadURL;
+          }
+        }
+
+        function isDropzoneAutoProccess(dzType) {
+          if (dzType == 'appeal' || dzType == 'registration') {
+            return false;
+          } else {
+            return true;
+          }
+        }
+
+        Dropzone.confirm = function (question, accepted, rejected) {
+          accepted();
+        };
+
+        function dzInitilize() {
+          if (
+            scope.pageCurrentObj.dropzoneType == 'registration' ||
+            scope.pageCurrentObj.dropzoneType == 'appeal'
+          )
+            return;
+
+          $timeout(function () {
+            var attahcmentsArray = scope.formCurrentObj.lAttachmentsNames;
+            var existingFileCount = 0;
+
+            if (!!attahcmentsArray && attahcmentsArray.length > 0) {
+              var mockFileTemplate = {
+                name: 'לחץ להצגה',
+                size: 12345,
+              };
+
+              attahcmentsArray.forEach(function (item) {
+                var mockFile = angular.copy(mockFileTemplate);
+
+                mockFile.AttachmentID = scope.formCurrentObj.AttachmentID;
+                mockFile.lAttachmentsNames = [item];
+                mockFile.onClickFunction = ViewStudentAttachment;
+                mockFile.id = GlobalMethods.createGuid();
+                mockFile.isFromServer = true;
+
+                dropzone.options.addedfile.call(dropzone, mockFile);
+                dropzone.options.thumbnail.call(
+                  dropzone,
+                  mockFile,
+                  'images/ico-fileName.svg'
+                );
+                dropzone.files.push(mockFile);
+                /*TODO: nececery?*/
+                dropzone.emit('complete', mockFile);
+
+                existingFileCount++; // The number of files already uploaded
+              });
+              dropzone.options.maxFiles =
+                dropzone.options.maxFiles - existingFileCount;
+            }
+          });
+        }
+
+        function dzSuccess(res) {
+          var response = JSON.parse(res.xhr.response);
+
+          if (response.Success) {
+            // success
+            $log.debug('SUCCESS');
+            if (scope.sended)
+              // check if need to notify
+              scope.sended({ DZType: scope.pageCurrentObj.dropzoneType }); // notify attachment sent
+
+            if (scope.pageCurrentObj.dropzoneType == 'registration') {
+              ModalManager.closeModal();
+              ModalManager.showModal('Info_Modal', {
+                title: 'הרשמה',
+                body: 'שמירה בוצעה',
+                image: null,
+              });
+            } else {
+              scope.formCurrentObj.dropzoneFilesHasChanged = false;
+            }
+            if (scope.pageCurrentObj.dropzoneType == 'appeal') {
+              dropzone.options.autoProcessQueue = true;
+            }
+          } else {
+            //error
+            if (scope.pageCurrentObj.dropzoneType == 'registration') {
+              dropzone.removeAllFiles(true);
+              scope.reloadCaptcha();
+              if (
+                response.Error.Description == '10164' ||
+                response.Error.Description == '10166' ||
+                response.Error.Description == '10091'
+              ) {
+                response.data = {
+                  Error: response.Error,
+                };
+                ResponseHandler.errorHandler(response);
+              } else {
+                ModalManager.showModal('Error_Modal', {
+                  body: 'טופס הבקשה לא נשלח, אנא נסה שנית',
+                });
+              }
+              return;
+            }
+
+            if (response.Error.Description == 10098) {
+              dropzone.removeAllFiles(true);
+              ModalManager.showModal('Error_Modal', {
+                title: 'שליחת ערעור',
+                body: 'הגשת ערעור בעבר לבקשה זו, אנא המתן לתשובה.',
+              });
+            } else {
+              ModalManager.showModal('Error_Modal');
+            }
+            var currentElement = angular.element(
+              element.find('.dz-preview')[
+                element.find('.dz-preview').length - 1
+              ]
+            );
+            var currentElementError = currentElement.find(
+              '.dz-error-message span'
+            );
+            var message = response.ErrorMessage;
+
+            currentElement.addClass('dz-error');
+            currentElement.find('.dz-error-message').remove();
+            //                        currentElementError.text(message);
+          }
+        }
+
+        function dzError(file, errorMessage) {
+          $log.debug('FAIL', errorMessage);
+          ModalManager.closeModal();
+          ModalManager.showModal('Error_Modal', { body: errorMessage });
+        }
+
+        function dzComplete(res) {
+          var response =
+            res.xhr && !!res.xhr.response ? JSON.parse(res.xhr.response) : {};
+
+          response.UserToken && StudentInfo.setUserToken(response.UserToken);
+
+          if (!response.Success) {
+            var errorObj = {};
+            errorObj['data'] = {
+              Error: response.Error,
+            };
+            if (scope.error) {
+              scope.error({ error: errorObj });
+              return;
+            }
+          }
+
+          if (
+            this.getUploadingFiles().length === 0 &&
+            this.getQueuedFiles().length === 0
+          ) {
+            if (scope.completed) {
+              // check if need to notify
+              scope.completed();
+            }
+          }
+        }
+
+        function dzRemovedfile(file) {
+          if (file.status == 'queued') return;
+
+          if (scope.requestStatus !== 0) return;
+
+          DataService.RemoveDocumentAttachmentsStudent({
+            AttachmentID: file.AttachmentID,
+            lAttachmentsNames: file.lAttachmentsNames,
+          }).then(function (res) {
+            if (!res.data.Success) {
+              ResponseHandler.errorHandler(res);
+            }
+          });
+
+          if (dropzone.files.length == 0) {
+            scope.formCurrentObj.AttachmentNotes = null;
+            scope.formCurrentObj.AttachmentPageCount = null;
+            scope.formCurrentObj.AttachmentIssueDate = null;
+
+            scope.formValidationObj.$setPristine();
+            scope.formValidationObj.$setUntouched();
+          }
+        }
+
+        function dzAddedfile(file) {
+          if (!scope.canUploadAttachment) return; // disable attachments upload
+
+          scope.formCurrentObj.dropzoneFilesHasChanged = true;
+
+          file.AttachmentID = scope.formCurrentObj.AttachmentID;
+          file.lAttachmentsNames = [
+            scope.formCurrentObj.AttachmentID +
+              '_' +
+              GlobalMethods.createFormatedDatetime(),
+          ];
+          file.onClickFunction = ViewStudentAttachment;
+          if (scope.added) {
+            // notify attachment added
+            scope.added();
+          }
+          $timeout(function () {
+            !scope.pageCurrentObj.isComplex && dropzone.processQueue();
+          });
+        }
+
+        function dzSending(file, xhr, formData) {
+          $log.debug('pageCurrentObj', scope.pageCurrentObj);
+          $log.debug('formCurrentObj', scope.formCurrentObj);
+
+          if (scope.pageCurrentObj.dropzoneType == 'registration') {
+            formData.append('FileName', file.lAttachmentsNames);
+            formData.append('FirstName', scope.formCurrentObj.FirstName);
+            formData.append('LastName', scope.formCurrentObj.LastName);
+            GlobalMethods.parseDateToString(scope.formCurrentObj.BirthDate);
+            formData.append(
+              'Birthday',
+              GlobalMethods.parseDateToString(scope.formCurrentObj.BirthDate)
+            );
+            formData.append('SSN', scope.formCurrentObj.SSN);
+            formData.append('Email', scope.formCurrentObj.Email);
+            formData.append('MobilePhone', scope.formCurrentObj.MobilePhone);
+            formData.append(
+              'GRecaptchaResponse',
+              scope.formCurrentObj.Recaptcha
+            );
+          } else if (scope.pageCurrentObj.dropzoneType == 'appeal') {
+            formData.append('FileName', file.lAttachmentsNames);
+            formData.append('SSN', StudentInfo.getStudentInfo().SSN);
+            formData.append(
+              'UserToken',
+              StudentInfo.getStudentInfo().UserToken
+            );
+            formData.append(
+              'RequestID',
+              StudentInfo.getStudentRequestInfo().RequestID
+            );
+            formData.append(
+              'AttachmentTypeCode',
+              scope.pageCurrentObj.attachmentTypeCode
+            );
+            formData.append(
+              'AttachmentID',
+              scope.pageCurrentObj && scope.pageCurrentObj.AttachmentID
+            );
+            formData.append(
+              'AttachmentPageCount',
+              (scope.pageCurrentObj &&
+                scope.pageCurrentObj.AttachmentPageCount) ||
+                1
+            );
+            formData.append('AttachmentIssueDate', null);
+            formData.append('AttachmentNotes', null);
+          } else {
+            formData.append('FileName', file.lAttachmentsNames);
+            formData.append('SSN', StudentInfo.getStudentInfo().SSN);
+            formData.append(
+              'UserToken',
+              StudentInfo.getStudentInfo().UserToken
+            );
+            formData.append(
+              'RequestID',
+              StudentInfo.getStudentRequestInfo().RequestID
+            );
+            formData.append(
+              'AttachmentTypeCode',
+              scope.pageCurrentObj.attachmentTypeCode
+            );
+            formData.append(
+              'AttachmentPageCount',
+              (scope.formCurrentObj &&
+                scope.formCurrentObj.AttachmentPageCount) ||
+                1
+            );
+            formData.append(
+              'AttachmentID',
+              scope.formCurrentObj && scope.formCurrentObj.AttachmentID
+            );
+            formData.append(
+              'AttachmentIssueDate',
+              scope.formCurrentObj &&
+                scope.formCurrentObj.AttachmentIssueDate &&
+                GlobalMethods.parseDateToString(
+                  scope.formCurrentObj.AttachmentIssueDate
+                )
+            );
+            formData.append(
+              'AttachmentNotes',
+              scope.formCurrentObj && scope.formCurrentObj.AttachmentNotes
+            );
+          }
+        }
+
+        function ViewStudentAttachment(
+          AttachmentID,
+          lAttachmentsNames,
+          isFromServer
+        ) {
+          if (!isFromServer) return;
+
+          DataService.ViewStudentAttachment({
+            AttachmentID: AttachmentID,
+            lAttachmentsNames: lAttachmentsNames,
+          }).then(function (res) {
+            if (!res.data.Success) {
+              ResponseHandler.errorHandler(res);
+            } else {
+              var FileData = res.data.Payload.FileData;
+              var FileExtension = res.data.Payload.FileExtension;
+              var FileMimeType = res.data.Payload.MimeType;
+
+              GlobalMethods.createBlobAndDisplay(
+                FileData,
+                FileExtension,
+                FileMimeType
+              );
+            }
+          });
+        }
+
+        dropzone.autoDiscover = false;
+
+        dropzone.on('error', dzError);
+        dropzone.on('success', dzSuccess);
+        dropzone.on('sending', dzSending);
+        dropzone.on('complete', dzComplete);
+        dropzone.on('addedfile', dzAddedfile);
+        dropzone.on('removedfile', dzRemovedfile);
+
+        scope.dropzone = dropzone;
+      },
+    };
+  };
+
+  bcDropzone.$inject = injectParams;
+  app.directive('bcDropzone', bcDropzone);
+});

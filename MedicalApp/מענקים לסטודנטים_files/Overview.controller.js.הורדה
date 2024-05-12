@@ -1,0 +1,164 @@
+define(['app', 'directives/bc-request-status-bar'], function (app) {
+  'use strict';
+
+  var injectParams = [
+    'GlobalRegexes',
+    'GlobalMethods',
+    'pageDataObj',
+    'DataService',
+    'toastr',
+    '$log',
+    'ResponseHandler',
+    'StudentInfo',
+    '$scope',
+    'requestDetails',
+    'ModalManager',
+  ];
+  var OverviewCtrl = function (
+    GlobalRegexes,
+    GlobalMethods,
+    pageDataObj,
+    DataService,
+    toastr,
+    $log,
+    ResponseHandler,
+    StudentInfo,
+    $scope,
+    requestDetails,
+    ModalManager
+  ) {
+    var vm = this;
+    vm.title = 'מסך הבית';
+
+    DataService.RequestYear =
+      requestDetails.data.Payload.RequestDetails.RequestYear;
+
+    vm.bankAttachmentObj =
+      requestDetails.data.Payload.RequestDetails.lBankAttachmentDetails; // getting the attachment object
+    vm.moveMessageToArchive = moveMessageToArchive;
+    vm.ToggleMessages = ToggleMessages;
+
+    vm.goToAppeal = goToAppeal;
+    vm.getScoringReasons = getScoringReasons;
+    vm.requestStatus = StudentInfo.getStudentRequestInfo().RequestStatus;
+    vm.isSendSimulatorEmailDate = StudentInfo.getStudentRequestInfo().IsSendSimulatorEmailDate;
+    vm.isDisplayArchive = false;
+
+    vm.goToBankDetails = goToBankDetails;
+    var pageDataObj = {
+      lConversationDetails:
+        pageDataObj.GetMessages.data.Payload.lConversationDetails,
+    };
+
+    vm.pageObject = {
+      displayedMessages: pageDataObj.lConversationDetails,
+      counterDays: (
+        '000' + StudentInfo.getStudentRequestInfo().DaysLeftForApplying
+      ).substr(-3, 3),
+    };
+
+    $scope.$emit(
+      'updateHeaderInfo',
+      StudentInfo.getStudentRequestInfo().StudentInfoDetails
+    );
+
+    function goToBankDetails() {
+      // redirect to fill the bank details
+      GlobalMethods.redirect('ApplicationFlow.BankAccountDetails', {
+        attachmentObj: vm.bankAttachmentObj,
+      });
+    }
+
+    function moveMessageToArchive(item) {
+      DataService.MoveToArchive({
+        ItemID: item.ItemID,
+      }).then(function (res) {
+        if (!res.data.Success) {
+          ResponseHandler.errorHandler(res);
+        } else {
+          toastr.info(
+            'הודעה הועברה לארכיון. ניתן לצפות בה בלחיצה על "הצג ארכיון"',
+            'העברה לארכיון.'
+          );
+
+          //remove item from current view
+          var itemIndexInMessagesArray = _.findIndex(
+            vm.pageObject.displayedMessages,
+            function (o) {
+              return o.ItemID == item.ItemID;
+            }
+          );
+          vm.pageObject.displayedMessages.splice(itemIndexInMessagesArray, 1);
+        }
+      });
+    }
+
+    function ToggleMessages(redirectToArchive) {
+      DataService.GetMessages({
+        ConversationDetails: {
+          IsArchive: redirectToArchive,
+        },
+      }).then(function (res) {
+        if (!res.data.Success) {
+          ResponseHandler.errorHandler(res);
+        } else {
+          vm.pageObject.displayedMessages =
+            res.data.Payload.lConversationDetails;
+          vm.isDisplayArchive = redirectToArchive;
+        }
+      });
+    }
+
+    function goToAppeal() {
+      DataService.GetAppealAttachmentID()
+        .then(function (res) {
+          if (res.data.Success) {
+            try {
+              ModalManager.showModal(
+                'SendAppeal_Modal',
+                null,
+                null,
+                res.data.Payload.AttachmentID
+              );
+            } catch (e) {
+              ResponseHandler.errorHandler(res);
+            }
+          } else {
+            ResponseHandler.errorHandler(res);
+          }
+        })
+        .catch(function (res) {
+          ResponseHandler.errorHandler(res);
+        });
+    }
+
+    function getScoringReasons() {
+      DataService.GetScoringReasons()
+        .then(function (res) {
+          if (res.data.Success) {
+            try {
+              ModalManager.showModal(
+                'ScoringReasons_Modal',
+                null,
+                null,
+                res.data.Payload.ScoringReasons
+              );
+            } catch (e) {
+              ResponseHandler.errorHandler(res);
+            }
+          } else {
+            ResponseHandler.errorHandler(res);
+          }
+        })
+        .catch(function (res) {
+          ResponseHandler.errorHandler(res);
+        });
+    }
+
+    $log.debug('pageDataObj', pageDataObj);
+    $log.debug('pageObject', vm.pageObject);
+  };
+
+  OverviewCtrl.$inject = injectParams;
+  app.controller('OverviewCtrl', OverviewCtrl);
+});

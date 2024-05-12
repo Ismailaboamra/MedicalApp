@@ -1,0 +1,19 @@
+define([
+    'app'
+], function (app) {
+    'use strict';
+
+    var injectParams = [];
+    var bcRequestStatusCircle = function () {
+        return {
+            restrict: 'E',
+            scope: {
+                imgPath: '@'
+            },
+            templateUrl: 'templates/components/requestStatusCircle.html'
+        }
+    }
+
+    bcRequestStatusCircle.$inject = injectParams;
+    app.directive('bcRequestStatusCircle', bcRequestStatusCircle);
+});

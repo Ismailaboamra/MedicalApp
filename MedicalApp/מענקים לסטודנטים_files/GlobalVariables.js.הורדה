@@ -1,0 +1,46 @@
+define(['angularAMD'], function (angularAMD) {
+    'use strict';
+
+    var injectParams = [];
+    var GlobalVariables = function () {
+
+        return {
+            navbarObj: [
+                {
+                    route: 'ApplicationFlow.Overview',
+                    pageTitle: 'בית'
+                },
+                {
+                    route: 'ApplicationFlow.PersonalDetails',
+                    pageTitle: 'פרטים אישיים'
+                },
+                {
+                    route: 'ApplicationFlow.StudyDetails',
+                    pageTitle: 'לימודים'
+                },
+                {
+                    route: 'ApplicationFlow.AdditionalDetails',
+                    pageTitle: 'פרטים נוספים'
+                },
+                {
+                    route: 'ApplicationFlow.DocumentAttachments',
+                    pageTitle: 'מסמכים'
+                }
+            ],
+            fileUploadURL: 'api/Halvaot/UploadDocumentAttachment',
+            userRegistrationURL: 'api/Halvaot/UserRegistration',
+            dataServiceURL: 'api/Halvaot/', //prodServerUrl
+//            dataServiceURL: 'http://yashir.eladsoftware.com:6969/', //mockServerURL
+//            dataServiceURL: 'http://localhost:6969/', //mockServerURL
+            //            dataServiceURL:  'https://yashir.eladsoftware.com/MOE.StudentsScholarshipAmir_CLIENT/DigitalService.DMZ.svc/web/', //devServerURL
+            //            dataServiceURL:  'https://yashir.eladsoftware.com/MOE.StudentsScholarshipAmir_QA/DigitalService.DMZ.svc/web/', //testServerURL
+            authenticationURL: 'api/Halvaot/Login',
+            //studentAccountLink: 'http://appslimud.education.gov.il/EduLogin/myaccount.aspx', //TEST
+            studentAccountLink: 'https://apps2.education.gov.il/EduLogin/myaccount.aspx', //PROD
+            isDebugMode : false
+        }
+    };
+
+    GlobalVariables.$inject = injectParams;
+    angularAMD.factory('GlobalVariables', GlobalVariables);
+});

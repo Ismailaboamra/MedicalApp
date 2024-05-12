@@ -1,0 +1,232 @@
+define(['angularAMD'], function (angularAMD) {
+    'use strict';
+
+    var injectParams = ['$log', 'GlobalMethods'];
+    var TransformRequest = function ($log, GlobalMethods) {
+        return {
+            PersonalDetails: PersonalDetails,
+            StudyDetails: StudyDetails,
+            AdditionalDetails: AdditionalDetails,
+            StudentAttachmentTransform: StudentAttachmentTransform,
+            //MoveToArchiveTransform: MoveToArchiveTransform,
+            //SendMessageTransform: SendMessageTransform,
+            SendAppealTransform: SendAppealTransform
+        }
+
+        function StudentAttachmentTransform(inputdata) {
+            var data = JSON.parse(inputdata);
+
+            var Transformed = {
+                RequestID: data.RequestID,
+                SSN: data.SSN,
+                UserToken: data.UserToken,
+                AttachmentDetails: {
+                    AttachmentID: data.AttachmentID,
+                    lAttachmentsNames: data.lAttachmentsNames,
+                    AttachmentIssueDate: !!data.AttachmentIssueDate ? '/Date(' + new Date(data.AttachmentIssueDate).getTime() + '+0200)/' : null,
+                    AttachmentNotes: data.AttachmentNotes,
+                    AttachmentPageCount: data.AttachmentPageCount
+                }
+            }
+
+            $log.debug('Transformed', Transformed);
+            return JSON.stringify(Transformed);
+        }
+
+        function MoveToArchiveTransform(inputdata) {
+            var data = JSON.parse(inputdata);
+
+            var Transformed = {
+                RequestID: data.RequestID,
+                SSN: data.SSN,
+                UserToken: data.UserToken,
+                ConversationDetails: {
+                    ItemID: data.ItemID
+                }
+            }
+
+            $log.debug('Transformed', Transformed);
+            return JSON.stringify(Transformed);
+        }
+
+        function SendAppealTransform(inputdata) {
+            var data = JSON.parse(inputdata);
+
+            var Transformed = {
+                RequestID: data.RequestID,
+                SSN: data.SSN,
+                UserToken: data.UserToken,
+                AppealContent: data.AppealContent
+            }
+
+            $log.debug('Transformed', Transformed);
+            return JSON.stringify(Transformed);
+        }
+
+        function SendMessageTransform(inputdata) {
+            var data = JSON.parse(inputdata);
+
+            var Transformed = {
+                RequestID: data.RequestID,
+                SSN: data.SSN,
+                UserToken: data.UserToken,
+                ConversationDetails: {
+                    ItemSubject: data.ItemSubject,
+                    ItemContent: data.ItemContent
+                }
+            }
+
+            $log.debug('Transformed', Transformed);
+            return JSON.stringify(Transformed);
+        }
+
+        function PersonalDetails(inputdata) {
+            var data = JSON.parse(inputdata);
+
+            var Transformed = {
+                RequestID: data.RequestID,
+                SSN: data.SSN,
+                UserToken: data.UserToken,
+                ChildrenDetails: {
+                    NumberOfChildrenAgeUnder21: data.NumberOfChildrenAgeUnder21.Code,
+                    lChildren: GlobalMethods.converingToChildObject(data.ChildrenBirthDate, data.ChildrenFirstName, data.ChildrenLastName, data.ChildrenSocialSecurityID, data.ChildDisabilityPercentageDetails, data.ChildrenID, data.NumberOfChildrenAgeUnder21.Code),
+                    HasChildrenAgeUnder21: data.HasChildrenAgeUnder21
+                },
+                MaritalStatusDetails: data.MaritalStatusDetails,
+                ParentADetails: data.HasChildrenAgeUnder21.Code === 1 ? {
+                    GraduateDetails: data.ParentAEducation
+                } : {
+                        DisabilityPercentageDetails: data.ParentADisabilityPercentageDetails,
+                        EmploymentDetails: data.ParentAEmploymentDetails,
+                        FirstName: data.ParentAFirstName,
+                        GraduateDetails: data.ParentAEducation,
+                        InTouchWithParentDetails: data.InTouchWithParentA,
+                        IsWelfareTreated: data.ParentAIsWelfareTreated,
+                        LastName: data.ParentALastName,
+                        ResidenceDetails: data.ParentAResidenceDetails,
+                        //SocialSecurityID: data.ParentASocialSecurityID
+                        SocialSecurityID: '012345682'
+                    },
+                ParentBDetails: data.HasChildrenAgeUnder21.Code === 1 ? {
+                    GraduateDetails: data.ParentBEducation
+                } : {
+                        DisabilityPercentageDetails: data.ParentBDisabilityPercentageDetails,
+                        EmploymentDetails: data.ParentBEmploymentDetails,
+                        FirstName: data.ParentBFirstName,
+                        GraduateDetails: data.ParentBEducation,
+                        InTouchWithParentDetails: data.InTouchWithParentB,
+                        IsWelfareTreated: data.ParentBIsWelfareTreated,
+                        LastName: data.ParentBLastName,
+                        ResidenceDetails: data.ParentBResidenceDetails,
+                        //SocialSecurityID: data.ParentBSocialSecurityID
+                        SocialSecurityID: '012345682'
+                    },
+                SiblingsDetails: {
+                    NumberOfSiblings: data.NumberOfSiblings.Code,
+                    lSiblings: GlobalMethods.converingToSiblingObject(data.SiblingBirthDate, data.SiblingFirstName, data.SiblingLastName,
+                        data.SiblingSocialSecurityID, data.SiblingDisabilityPercentageDetails, data.IsSiblingAStudent, data.SiblingID, data.NumberOfSiblings.Code),
+                    HasSiblings: data.HasSiblings
+                },
+                SpouseDetails: {
+                    BirthDate: !!data.SpouseBirthDate ? '/Date(' + new Date(data.SpouseBirthDate).getTime() + '+0200)/' : null,
+                    EmploymentDetails: data.SpouseEmploymentDetails,
+                    FirstName: data.SpouseFirstname,
+                    LastName: data.SpouseLastName,
+                    //SocialSecurityID: data.SpouseSocialSecurityID,
+                    SocialSecurityID: '012345682',
+                    IsSpouseAStudent: data.IsSpouseAStudent,
+                    HasSpouse: data.HasSpouse,
+                    StudyInstituteDetails: data.SpouseStudyInstituteDetails,
+                    DisabilityPercentageDetails: data.SpouseDisabilityPercentageDetails
+                },
+                StudentInfo: {
+                    IsStudentInterestedInLoan: data.IsStudentInterestedInLoan,
+                    BirthYear: data.BirthYear,
+                    Email: data.Email,
+                    FirstName: data.FirstName,
+                    FormerLastName: data.FormerLastName,
+                    GenderDetails: data.GenderDetails,
+                    IsStudentBtlEmploymentIncapacity: data.IsStudentBtlEmploymentIncapacity,
+                    IsStudentHavtachatTashlumMezonot: data.IsStudentHavtachatTashlumMezonot,
+                    IsStudentOrSpouseHavtachatHachnasa: data.IsStudentOrSpouseHavtachatHachnasa,
+                    IsStudentOrSpouseTorahScholarship: data.IsStudentOrSpouseTorahScholarship,
+                    LandlineNumber: data.LandlineNumber,
+                    LastName: data.LastName,
+                    MobileNumber: data.MobileNumber,
+                    SocialSecurityID: data.SocialSecurityID,
+                    ParentsResidenceDetails: data.ParentsResidenceDetails
+                },
+                StudentPermanentResidenceDetails: {
+                    CityDetails: data.CityDetails,
+                    Neighborhood: data.Neighborhood,
+                    Entrance: data.Entrance,
+                    FlatNumber: data.FlatNumber,
+                    IsAddressInShikumSchunot: data.IsAddressInShikumSchunot,
+                    MobilePostOffice: data.MobilePostOffice,
+                    PostOfficeBox: data.PostOfficeBox,
+                    StreetDetails: data.StreetDetails,
+                    StreetNumber: data.StreetNumber
+                },
+                WelfareTreatedDetails: {
+                    StudentFamilyWelfareTreatedDetails: data.StudentFamilyWelfareTreatedDetails,
+                    IsStudentOrSpouseWelfareTreated: data.IsStudentOrSpouseWelfareTreated
+                }
+            }
+
+            $log.debug('Transformed', Transformed);
+            return JSON.stringify(Transformed);
+        }
+
+        function StudyDetails(inputdata) {
+            var data = JSON.parse(inputdata);
+
+            $log.debug('BEFORE TRANSFORM', data);
+
+            data.CourseOfStudy = {
+                Minor: !!data.Minor ? data.Minor : {
+                    Code: null,
+                    Desc: null
+                },
+                Major: data.Major
+            }
+
+            $log.debug('Transformed', data);
+            return JSON.stringify(data);
+        }
+
+        function AdditionalDetails(inputdata) {
+
+            var data = JSON.parse(inputdata);
+
+            data.HighschoolResidenceDetails = {
+                CityDetails: data.ShikumSchunotCity,
+                IsHighSchoolAddressInShikumSchunot: data.IsHighSchoolAddressInShikumSchunot,
+                ShikumSchunotNeighborhood: data.ShikumSchunotNeighborhood,
+                StreetDetails: data.ShikumSchunotStreet,
+                IsLivedInIsrael: data.IsLivedInIsrael
+            };
+
+            data.IDFOrSherutLeumiDetails = {
+                IDFIDNumber: data.StudentIDFIDNumber,
+                PastServiceDetails: data.PastServiceDetails,
+                IsStudentInIDFReserveService: data.IsStudentInIDFReserveService,
+                ReleaseDate: !!data.ReleaseDate ? '/Date(' + new Date(data.ReleaseDate).getTime() + '+0200)/' : null,
+                StartDate: !!data.StartDate ? '/Date(' + new Date(data.StartDate).getTime() + '+0200)/' : null,
+                TotalNumberOfReserveDaysLastYear: data.TotalNumberOfReserveDaysLastYear,
+                lIDFReserveDetailsLastYear: GlobalMethods.converingToReserveObject(data.IDFReserveStartDate, data.IDFReserveEndDate, data.IDFReserveID),
+            };
+
+            $log.debug('Transformed', data);
+            return JSON.stringify(data);
+        }
+
+        function DocumentAttachments(inputdata) {
+            return inputdata;
+        }
+    }
+
+    TransformRequest.$inject = injectParams;
+    angularAMD.factory('TransformRequest', TransformRequest);
+});
+
+

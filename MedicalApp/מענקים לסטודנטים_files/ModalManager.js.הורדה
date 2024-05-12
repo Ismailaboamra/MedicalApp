@@ -1,0 +1,442 @@
+define(['angularAMD', 'ngDialog'], function (angularAMD) {
+  'use strict';
+
+  var injectParams = [
+    'ngDialog',
+    '$log',
+    'DataService',
+    'ResponseHandler',
+    'GlobalMethods',
+    'FieldsEnumConstant',
+    '$state',
+    'StudentInfo',
+    'GlobalRegexes',
+    'vcRecaptchaService',
+    '$rootScope',
+    '$timeout',
+  ];
+  var ModalManager = function (
+    ngDialog,
+    $log,
+    DataService,
+    ResponseHandler,
+    GlobalMethods,
+    FieldsEnumConstant,
+    $state,
+    StudentInfo,
+    GlobalRegexes,
+    vcRecaptchaService,
+    $rootScope,
+    $timeout
+  ) {
+    var templatesFolder = 'templates/modals/';
+
+    return {
+      showModal: showModal,
+      closeModal: closeModal,
+    };
+
+    function closeModal() {
+      ngDialog.close();
+    }
+
+    function showModal(modalComponent, title, body, extraData) {
+      switch (modalComponent) {
+        case 'Table_Ajax_Modal':
+          ngDialog.open(tableAjaxModalObject(title, body, extraData));
+          break;
+        case 'SendAppeal_Modal':
+          ngDialog.open(sendAppealModalObject(extraData));
+          break;
+        case 'Registration_Modal':
+          ngDialog.open(registrationModalObject());
+          break;
+        case 'SendRequest_Modal':
+          ngDialog.open(sendRequestModalObject());
+          break;
+        case 'FieldError_Modal':
+          ngDialog.open(
+            fieldErrorModalObject(
+              GlobalMethods.getFieldObjectFromEnum(title),
+              body,
+              title
+            )
+          );
+          break;
+        case 'ScoringReasons_Modal':
+          ngDialog.open(scoringReasonsModalObject(extraData));
+          break;
+
+        default:
+          ngDialog.open(genericDialogObject(modalComponent, title));
+      }
+    }
+
+    function tableAjaxModalObject(title, tableTitle, endPoint) {
+      return {
+        template: templatesFolder + 'Table_Ajax_Modal.html',
+        controller: [
+          'resolveData',
+          function (resolveData) {
+            var vm = this;
+
+            var Payload = resolveData.data.Payload;
+
+            vm.data = Payload[Object.keys(Payload)[0]];
+
+            vm.close = close;
+
+            function close() {
+              ngDialog.close();
+            }
+          },
+        ],
+        resolve: {
+          resolveData: function () {
+            return DataService[endPoint]();
+          },
+        },
+        data: {
+          title: title,
+          tableTitle: tableTitle,
+        },
+        controllerAs: 'modalCtrl',
+        className: 'ngdialog-theme-default',
+        appendClassName: 'ngdialog-custom',
+        appendTo: '.container',
+        showClose: false,
+        closeByNavigation: true,
+      };
+    }
+
+    function sendRequestModalObject() {
+      return {
+        template: templatesFolder + 'SendRequest_Modal.html',
+        controller: function () {
+          var vm = this;
+
+          vm.close = close;
+          vm.submitForm = submitForm;
+
+          vm.checkbox_1 = false;
+          vm.checkbox_2 = false;
+          vm.checkbox_3 = false;
+          vm.checkbox_4 = false;
+          vm.checkbox_5 = false;
+
+          function submitForm() {
+            if (
+              vm.checkbox_1 &&
+              vm.checkbox_2 &&
+              vm.checkbox_3 &&
+              vm.checkbox_4 &&
+              vm.checkbox_5
+            ) {
+              DataService.SendRequest({
+                IsUserApproved: true,
+              }).then(function (res) {
+                if (!res.data.Success) {
+                  ResponseHandler.errorHandler(res);
+                } else {
+                  ngDialog.close();
+                  ngDialog.open(
+                    genericDialogObject('Info_Modal', {
+                      title: 'שליחת פנייה למערכת',
+                      body: 'תודה, פנייתך נשלחה.',
+                      image: null,
+                    })
+                  );
+
+                  //redirect to Overview page if on DocumentAttachments page
+
+                  DataService.GetRequestDetails(
+                    StudentInfo.getStudentRequestParams()
+                  ).then(function (res) {
+                    if (res.data.Success) {
+                      $rootScope.$broadcast(
+                        'RequestDetailsUpdated',
+                        res.data.Payload.RequestDetails
+                      );
+                      $state.current.name ==
+                        'ApplicationFlow.DocumentAttachments' &&
+                        GlobalMethods.redirect('ApplicationFlow.Overview');
+                    }
+                  });
+
+                  //$state.current.name == 'ApplicationFlow.DocumentAttachments' && GlobalMethods.redirect('ApplicationFlow.Overview');
+                }
+              });
+            } else {
+              ngDialog.open(
+                genericDialogObject('Error_Modal', {
+                  title: 'שליחת פנייה למערכת',
+                  body: 'שים לב בבקשה - הבקשה לא נשלחה לטיפול. לשליחת הבקשה יש לאשר את כל התנאים.',
+                  image: null,
+                })
+              );
+            }
+          }
+          function close() {
+            ngDialog.close();
+          }
+        },
+        controllerAs: 'modalCtrl',
+        className: 'ngdialog-theme-default',
+        appendClassName: 'ngdialog-custom send-request-modal',
+        appendTo: '.container',
+        showClose: false,
+        closeByNavigation: true,
+      };
+    }
+
+    function sendAppealModalObject(attchmentID) {
+      return {
+        template: templatesFolder + 'SendAppeal_Modal.html',
+        controllerAs: 'appealCtrl',
+        controller: function () {
+          var vm = this;
+
+          vm.close = close;
+          vm.sendAppeal = sendAppeal;
+          vm.finishAppealFacade = finishAppealFacade;
+          vm.appealError = appealError;
+          vm.attachmentAdded = attachmentAdded;
+
+          vm.pageObjectAppeal = {
+            // used also in the dropzone
+            dropzoneType: 'appeal',
+            attachmentTypeCode: 4037,
+            isComplex: true,
+            appealContent: '', // appeal data (from html form)
+            AttachmentID: attchmentID,
+            gotAttachment: false,
+          };
+
+          // Send Appeal (no attachment)
+          function sendAppeal(form, dropzone) {
+            if (!form.$valid) {
+              form.$submitted = true;
+              return;
+            }
+
+            var data = {
+              AppealContent: vm.pageObjectAppeal.appealContent,
+              RequestID: StudentInfo.getStudentRequestInfo().RequestID,
+              SSN: StudentInfo.getStudentInfo().SSN,
+              AttachmentID: vm.pageObjectAppeal.AttachmentID,
+              UserToken: StudentInfo.getStudentInfo().UserToken,
+            };
+
+            DataService.SendAppeal(data)
+              .then(function (res) {
+                if (!res.data.Success) {
+                  ResponseHandler.errorHandler(res);
+                } else {
+                  if (vm.pageObjectAppeal.gotAttachment) {
+                    if (dropzone) {
+                      dropzone.processQueue(); // send the appeal from the dropzone attachment upload
+                    }
+                  } else {
+                    finishAppealFacade();
+                  }
+                }
+              })
+              .catch(function (res) {
+                ResponseHandler.errorHandler(res);
+              });
+          }
+
+          // Handle the actions after finishing with the appeal
+          function finishAppealFacade() {
+            ngDialog.close();
+            openFinishModal();
+          }
+
+          // Open the finish sending appeal modal
+          function openFinishModal() {
+            ngDialog.open(
+              genericDialogObject('Info_Modal', {
+                title: 'שליחת ערעור למערכת',
+                body: 'תודה, פנייתך נשלחה.<br />בסיום טיפול תשלח אלייך הודעה.',
+                image: null,
+              })
+            );
+          }
+
+          // Listen to errors (injected to the dropzone)
+          function appealError(error) {
+            ngDialog.close();
+            ResponseHandler.errorHandler(error);
+          }
+
+          // Notify when attachment Added to the dropzone
+          function attachmentAdded() {
+            vm.pageObjectAppeal.gotAttachment = true;
+          }
+
+          function close() {
+            ngDialog.close();
+          }
+        },
+        className: 'ngdialog-theme-default',
+        appendClassName: 'ngdialog-custom',
+        appendTo: '.container',
+        showClose: false,
+        closeByNavigation: true,
+      };
+    }
+
+    function registrationModalObject() {
+      return {
+        template: templatesFolder + 'Registration_Modal.html',
+        controller: function () {
+          var vm = this;
+          var captchaID = null;
+
+          vm.close = close;
+          vm.submitForm = submitForm;
+          vm.formObject = {};
+          vm.setWidgetId = setWidgetId;
+          vm.reloadCaptcha = reloadCaptcha;
+          vm.GlobalRegexes = GlobalRegexes;
+
+          vm.optionsObject = {
+            isComplex: true,
+            dropzoneType: 'registration',
+          };
+
+          vm.datePickerOptions = {
+            maxDate: new Date('2005-12-12'),
+            showWeeks: false,
+            initDate: new Date('2005-12-12'),
+          };
+
+          function setWidgetId(id) {
+            captchaID = id;
+          }
+
+          function reloadCaptcha() {
+            vcRecaptchaService.reload(captchaID);
+          }
+
+          function submitForm($event, isValid) {
+            // sets form submitted (no such default functionality for nested forms)
+            //                        registrationForm.$setSubmitted();
+
+            if (!isValid) return;
+
+            $log.debug('formObject', vm.formObject);
+
+            angular
+              .element($event.currentTarget)
+              .find('.dropzone')[0]
+              .dropzone.processQueue();
+          }
+
+          function close() {
+            ngDialog.close();
+          }
+        },
+        controllerAs: 'modalCtrl',
+        className: 'ngdialog-theme-default',
+        appendClassName: 'ngdialog-custom registration-modal',
+        appendTo: '.container',
+        showClose: false,
+        closeByNavigation: true,
+      };
+    }
+
+    function fieldErrorModalObject(fieldObject, messageType, fieldEnum) {
+      return {
+        template: templatesFolder + 'FieldError_Modal.html',
+        controller: function () {
+          var vm = this;
+
+          vm.close = close;
+          vm.redirectToField = redirectToField;
+
+          function redirectToField(fieldID) {
+            ngDialog.close();
+            GlobalMethods.redirectToField(fieldID);
+          }
+
+          function close() {
+            ngDialog.close();
+          }
+        },
+        data: {
+          fieldObject: fieldObject,
+          messageType: messageType,
+          fieldEnum: fieldEnum,
+        },
+        controllerAs: 'modalCtrl',
+        className: 'ngdialog-theme-default',
+        appendClassName: 'ngdialog-custom',
+        appendTo: '.container',
+        showClose: false,
+        closeByNavigation: true,
+      };
+    }
+
+    function genericDialogObject(modalComponent, modalObject) {
+      return {
+        template: templatesFolder + modalComponent + '.html',
+        controller: function () {
+          var vm = this;
+
+          vm.close = close;
+
+          //close current open dialog if exists
+          //                    ngDialog.close();
+
+          function close() {
+            ngDialog.close();
+          }
+        },
+        data: {
+          title: modalObject && modalObject.title,
+          body: modalObject && modalObject.body,
+          image: modalObject && modalObject.image,
+        },
+        controllerAs: 'modalCtrl',
+        className: 'ngdialog-theme-default',
+        appendClassName: 'ngdialog-custom',
+        appendTo: '.container',
+        showClose: false,
+        closeByNavigation: true,
+      };
+    }
+
+    function scoringReasonsModalObject(scoringReasons) {
+      return {
+        template: templatesFolder + 'ScoringReasons_Modal.html',
+        controller: function () {
+          var vm = this;
+
+          vm.scoringReasons = scoringReasons;
+          vm.calculateScoringSum = calculateScoringSum;
+          vm.close = close;
+
+          function calculateScoringSum() {
+            return vm.scoringReasons.reduce(function (acc, val) {
+              return acc + val.Count;
+            }, 0);
+          }
+
+          function close() {
+            ngDialog.close();
+          }
+        },
+        controllerAs: 'modalCtrl',
+        className: 'ngdialog-theme-default',
+        appendClassName: 'scoring-reasons-modal',
+        appendTo: '.container',
+        showClose: false,
+        closeByNavigation: true,
+      };
+    }
+  };
+
+  ModalManager.$inject = injectParams;
+  angularAMD.factory('ModalManager', ModalManager);
+});

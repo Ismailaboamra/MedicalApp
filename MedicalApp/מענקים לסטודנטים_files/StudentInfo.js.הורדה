@@ -1,0 +1,70 @@
+define(['angularAMD'], function (angularAMD) {
+    'use strict';
+
+    var injectParams = [];
+    var StudentInfo = function () {
+        var _studentInfo = {};
+
+        var _studentRequestInfo = {}
+
+        return {
+            setUserToken : setUserToken,
+            getStudentInfo : getStudentInfo,
+            getStudentRequestInfo : getStudentRequestInfo,
+            clearStudentObject : clearStudentObject,
+            setStudentInfo : setStudentInfo,
+            setStudentRequestInfo : setStudentRequestInfo,
+            isAuthenticated : isAuthenticated,
+            getStudentRequestParams : getStudentRequestParams
+        };
+
+        function getStudentRequestParams(){
+            return {
+                SSN : this.getStudentInfo().SSN,
+                UserToken : this.getStudentInfo().UserToken,
+                RequestID : this.getStudentRequestInfo().RequestID
+            }
+        }
+
+        function setUserToken(userToken){
+            _studentInfo.UserToken = userToken;
+        }
+
+        function clearStudentObject () {
+            _studentInfo = {};
+            _studentRequestInfo = {};
+        }
+
+        function getStudentInfo() {
+            return _studentInfo;
+        }
+
+        function getStudentRequestInfo() {
+            return _studentRequestInfo;
+        }
+
+        function setStudentInfo(studentInfo) {
+            _studentInfo = studentInfo;
+        }
+
+        function setStudentRequestInfo(setStudentRequestInfo) {
+            _studentRequestInfo = setStudentRequestInfo;
+        }
+
+        function isAuthenticated() {
+            try {
+                if (this.getStudentInfo().UserToken != null)
+                    return true;
+                else
+                    return false;
+            } catch (ex) {
+                console.error(ex.message);
+            }
+
+            return false;
+        }
+    };
+
+    StudentInfo.$inject = injectParams;
+    angularAMD.factory('StudentInfo', StudentInfo);
+});

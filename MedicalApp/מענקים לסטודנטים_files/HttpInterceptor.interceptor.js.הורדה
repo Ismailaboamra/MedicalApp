@@ -1,0 +1,38 @@
+define(['angularAMD'], function (angularAMD) {
+    'use strict';
+
+    var injectParams = ['StudentInfo'];
+    var HttpInterceptor = function (StudentInfo) {
+
+        var numLoadings = 0;
+        var spinnerElement = angular.element(document.querySelector('.spinnerContainer'));
+
+        return {
+            request: function (config) {
+                numLoadings++;
+                spinnerElement.addClass('show');
+                return config;
+            },
+
+            requestError: function (config) {
+                return config;
+            },
+
+            response: function (res) {
+                --numLoadings === 0 && spinnerElement.removeClass('show');
+                res.data.UserToken && StudentInfo.setUserToken(res.data.UserToken);
+
+                return res;
+            },
+
+            responseError: function (res) {
+                !(--numLoadings) && spinnerElement.removeClass('show');
+
+                return res;
+            }
+        }
+    };
+
+    HttpInterceptor.$inject = injectParams;
+    angularAMD.factory('HttpInterceptor', HttpInterceptor);
+});

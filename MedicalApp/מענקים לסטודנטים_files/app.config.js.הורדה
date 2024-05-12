@@ -1,0 +1,245 @@
+define(['angularAMD'], function (angularAMD) {
+  'use strict';
+
+  return function (
+    $locationProvider,
+    $stateProvider,
+    $httpProvider,
+    $logProvider,
+    $urlRouterProvider,
+    toastrConfig,
+    vcRecaptchaServiceProvider
+  ) {
+    $stateProvider
+      .state(
+        'Login',
+        angularAMD.route({
+          url: '/',
+          controllerAs: 'loginCtrl',
+          templateUrl: 'templates/views/LoginPage.html',
+          controller: 'LoginCtrl',
+          title: 'loginPage',
+          resolve: {
+            pageDataObj: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetLoginPageData();
+              },
+            ],
+          },
+        })
+      )
+      .state(
+        'ApplicationFlow',
+        angularAMD.route({
+          abstract: true,
+          controllerAs: 'applicationFlowCtrl',
+          templateUrl: 'templates/views/ApplicationFlowPage.html',
+          controller: 'ApplicationFlowCtrl',
+        })
+      )
+      .state(
+        'ApplicationFlow.Overview',
+        angularAMD.route({
+          url: '/Overview',
+          controllerAs: 'overviewCtrl',
+          templateUrl: 'templates/views/ApplicaionFlowPages/OverviewPage.html',
+          controller: 'OverviewCtrl',
+          title: 'overviewPage',
+          requiresLogin: true,
+          resolve: {
+            //getSystemMessages: ['DataService', 'StudentInfo', function (DataService, StudentInfo) {
+            //    return DataService.GetSystemMessages();
+            //}],
+            requestDetails: [
+              'DataService',
+              'StudentInfo',
+              'GlobalMethods',
+              function (DataService, StudentInfo, GlobalMethods) {
+                return DataService.GetRequestDetails(
+                  StudentInfo.getStudentRequestParams()
+                );
+              },
+            ],
+            pageDataObj: [
+              'DataService',
+              'StudentInfo',
+              'requestDetails',
+              function (DataService, StudentInfo, requestDetails) {
+                StudentInfo.setStudentRequestInfo(
+                  requestDetails.data.Payload.RequestDetails
+                );
+                return DataService.GetOverviewPageData();
+              },
+            ],
+          },
+        })
+      )
+      .state(
+        'ApplicationFlow.PersonalDetails',
+        angularAMD.route({
+          url: '/PersonalDetails?fieldId',
+          controllerAs: 'personalDetailsCtrl',
+          templateUrl:
+            'templates/views/ApplicaionFlowPages/PersonalDetailsPage.html',
+          controller: 'PersonalDetailsCtrl',
+          title: 'personalDetailsPage',
+          requiresLogin: true,
+          resolve: {
+            pageDataObj: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetPersonalDetailsPageData();
+              },
+            ],
+            autofillObj: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetPersonalDetails();
+              },
+            ],
+          },
+        })
+      )
+      .state(
+        'ApplicationFlow.StudyDetails',
+        angularAMD.route({
+          url: '/StudyDetails?fieldId',
+          controllerAs: 'studyDetailsCtrl',
+          templateUrl:
+            'templates/views/ApplicaionFlowPages/StudyDetailsPage.html',
+          controller: 'StudyDetailsCtrl',
+          title: 'studyDetailsPage',
+          requiresLogin: true,
+          resolve: {
+            pageDataObj: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetStudyDetailsPageData();
+              },
+            ],
+            autofillObj: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetStudyDetails();
+              },
+            ],
+          },
+        })
+      )
+      .state(
+        'ApplicationFlow.AdditionalDetails',
+        angularAMD.route({
+          url: '/AdditionalDetails?fieldId',
+          controllerAs: 'additionalDetailsCtrl',
+          templateUrl:
+            'templates/views/ApplicaionFlowPages/AdditionalDetailsPage.html',
+          controller: 'AdditionalDetailsCtrl',
+          title: 'additionalDetailsPage',
+          requiresLogin: true,
+          resolve: {
+            /* pageDataObj: ['DataService', function (DataService) {
+                        return DataService.GetAdditionalDetailsPageData();
+                    }], */
+            autofillObj: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetAdditionalDetails();
+              },
+            ],
+          },
+        })
+      )
+      .state(
+        'ApplicationFlow.DocumentAttachments',
+        angularAMD.route({
+          url: '/DocumentAttachments?fieldId',
+          controllerAs: 'documentAttachmentsCtrl',
+          templateUrl:
+            'templates/views/ApplicaionFlowPages/DocumentAttachmentsPage.html',
+          controller: 'DocumentAttachmentsCtrl',
+          title: 'documentAttachmentsPage',
+          requiresLogin: true,
+          resolve: {
+            pageDataObj: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetDocumentAttachmentsPageData();
+              },
+            ],
+          },
+        })
+      )
+      .state(
+        'ApplicationFlow.BankAccountDetails',
+        angularAMD.route({
+          url: '/BankAccountDetails',
+          controllerAs: 'bankAccountDetailsCtrl',
+          templateUrl:
+            'templates/views/ApplicaionFlowPages/BankAccountDetailsPage.html',
+          controller: 'BankAccountDetailsCtrl',
+          title: 'bankAccountDetailsPage',
+          requiresLogin: true,
+          resolve: {
+            banksList: [
+              'DataService',
+              function (DataService) {
+                return DataService.GetBanksList();
+              },
+            ],
+            studentBankDetails: [
+              'DataService',
+              'banksList',
+              function (DataService, banksList) {
+                return DataService.GetStudentBankAccountDetails();
+              },
+            ],
+          },
+          params: { attachmentObj: null },
+        })
+      );
+
+    //Html5Mode config
+    $urlRouterProvider.otherwise('/');
+    $locationProvider.html5Mode(true);
+
+    //Toastr config
+    angular.extend(toastrConfig, {
+      allowHtml: false,
+      closeButton: true,
+      closeHtml: '<button>&times;</button>',
+      iconClasses: {
+        error: 'toast-error',
+        info: 'toast-info',
+        success: 'toast-success',
+        warning: 'toast-warning',
+      },
+      messageClass: 'toast-message',
+      progressBar: false,
+      tapToDismiss: false,
+      positionClass: 'toast-bottom-right',
+      preventOpenDuplicates: true,
+      templates: {
+        toast: 'templates/toasts/toastTemplate.html',
+      },
+      timeOut: 5000,
+      titleClass: 'toast-title',
+      toastClass: 'toast',
+    });
+
+    //Recaptcha config
+    vcRecaptchaServiceProvider.setDefaults({
+      key: '6LfeuzwUAAAAAK2puYB5wf2HTSNji3FLOShcuUGA',
+      theme: 'light',
+      size: 'normal',
+      type: 'image',
+      lang: 'iw',
+    });
+
+    //Interceptors config
+    $httpProvider.interceptors.push('HttpInterceptor');
+
+    //isDebugMode config
+    $logProvider.debugEnabled(false);
+  };
+});

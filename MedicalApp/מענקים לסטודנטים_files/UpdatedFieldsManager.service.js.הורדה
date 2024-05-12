@@ -1,0 +1,244 @@
+define([
+    'angularAMD',
+], function (angularAMD) {
+    'use strict';
+
+    var injectParams = ['$http', 'GlobalVariables'];
+    var UpdatedFieldsManager = function ($http, GlobalVariables) { // manages the fields extra props (approve, edit, remark)
+        // arrange, delete and prepare fields for tabs and states
+        var UpdatedFields = {};
+        var orderOfDuplicatesByKey = {};
+        var orderOfDuplicatesByIndex = {};
+
+        return {
+            flatEditFieldsList: flatEditFieldsList,
+            filterFiledsByTabCode: filterFiledsByTabCode,
+            addFieldToUpdatedFields: addFieldToUpdatedFields,
+            deleteFieldUpdatedFields: deleteFieldUpdatedFields,
+            createMapToDuplicatedFields: createMapToDuplicatedFields,
+            prepareFieldsStatuses: prepareFieldsStatuses
+        }
+
+        // Add amount of duplicate fields to the fields list (children/sibling/reserve)
+        function addAmountOfDuplicateFields(fieldsStatusesList, amount) {
+            fieldsStatusesList['amountOfDuplicates'] = amount;
+        }
+
+        // Preparing the fields statuses list for the UI
+        function prepareFieldsStatuses(tabCode, fieldsStatusesList) {
+            filterFiledsByTabCode(tabCode);
+            return fieldsStatusesList ? flatEditFieldsList(fieldsStatusesList) : null;
+        }
+
+        // Creating a map of duplicate fields by their order
+        function createMapToDuplicatedFields(listToMap) {
+            for (var i = 0; i < listToMap.length; i++) {
+                orderOfDuplicatesByKey[listToMap[i].ID] = i;
+                orderOfDuplicatesByIndex[i] = listToMap[i].ID;
+            }
+        }
+
+        // Reset the orderOfDuplicates to empty objects
+        function resetOrderOfDuplicates() {
+            orderOfDuplicatesByKey = {};
+            orderOfDuplicatesByIndex = {};
+        }
+
+        // Flatting the edit fields list
+        function flatEditFieldsList(list) {
+            if (UpdatedFields) // clean the object if its already populated (used for moving between tabs)
+                UpdatedFields = {};
+
+            addAmountOfDuplicateFields(UpdatedFields, Object.keys(orderOfDuplicatesByKey).length);
+            
+            if (Object.keys(orderOfDuplicatesByKey).length > 0)
+                arrangeList(list); // arrange fields by the correct order
+
+            if (!list) return;
+            list.map(function (field) {
+                var fieldObj = {
+                    IsApproved: field.IsApproved,
+                    IsEdited: field.IsEdited,
+                    HasRemark: field.HasRemark
+                }
+                addFieldToUpdatedFields(field.FieldID, undefined, fieldObj, field.MultipleItemID);
+            });
+
+            return UpdatedFields;
+        }
+
+        // Arrange the duplicate fields in the list by their correct order
+        function arrangeList(list) {
+            list.sort(function (a, b) { // sorting the list by the fields id
+                return a.FieldID - b.FieldID;
+            });
+            var counter = 0;
+            var duplicateFieldsLength = Object.keys(orderOfDuplicatesByKey).length; // taking the duplicate fields object length
+            var templist = new Array(); // init temp list to store the fields by the correct order
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].MultipleItemID) { // check if got multiple ID
+
+                    var currentFieldKey = list[i].FieldID; // save the currnet field im running on
+                    for (var j = i; j < list.length; j++) {
+                        if (currentFieldKey !== list[j].FieldID) break; // not the same field -> break (for not saving it in the list)
+
+                        var order = orderOfDuplicatesByKey[list[j].MultipleItemID]; // get the field correct order in the list 
+                        counter++;
+                        templist[order] = list[j]; // assign
+                    }
+                    list.splice(i, counter); // delete from the original list
+                    for (var j = duplicateFieldsLength - 1; j >= 0; j--) {
+                        if (!templist[j]) {
+                            var fieldObj = fieldFactory(currentFieldKey, null, null, orderOfDuplicatesByIndex[j]);
+                            list.unshift(fieldObj);
+                        }
+                        else {
+                            list.unshift(templist[j]); // put the fields back to the original list by the correct order
+                        }
+                    }
+                    i += duplicateFieldsLength - 1; // set the i to the right position
+                    counter = 0; // reset
+                    templist = new Array(); // reset
+                }
+            }
+            resetOrderOfDuplicates(); // reset duplicates map
+        }
+
+        // filter the list for a specific tab 
+        function filterFiledsByTabCode(tabCode) {
+            if (!tabCode) return;
+
+            var tabCodeNumber = Number(tabCode); // get tab code as number
+
+            var list = Object.getOwnPropertyNames(UpdatedFields); // get the keys(names)
+            for (var i = 0; i < list.length; i++) {
+                var fieldIdNumber = Number(list[i]); // get field id as number
+
+                var greater = (fieldIdNumber - tabCodeNumber) > 999; // if greater then tab code
+                var lesser = (fieldIdNumber - tabCodeNumber) < 0; // if lesser then tab code
+
+                if (greater || lesser) { // if not belongs to the current tab -> delete
+                    delete UpdatedFields[list[i]];
+                }
+            }
+        }
+
+        // Adding new field to the updated fields object
+        function addFieldToUpdatedFields(fieldId, oldVal, extraFieldProps, childMultipleId, childIndex) {
+            // check if the field object exists
+            if (UpdatedFields.hasOwnProperty(fieldId)) {
+                if (UpdatedFields[fieldId].constructor === Array) { // check if its already a list of fields objects
+
+                    if (UpdatedFields[fieldId][childIndex]) {
+                        if (UpdatedFields[fieldId][childIndex].MultipleItemID === childMultipleId) { // check if already got this field children
+                            UpdatedFields[fieldId][childIndex] = fieldFactory(fieldId, oldVal, extraFieldProps, childMultipleId);
+                            return;
+                        }
+                    }
+                    var newFieldObj = fieldFactory(fieldId, oldVal, extraFieldProps, childMultipleId); // create new field object
+                    UpdatedFields[fieldId].push(newFieldObj); // add to the list
+                }
+                else {
+                    // check if theres multiple child. true -> make a list for that field ID
+                    if (UpdatedFields[fieldId].MultipleItemID) {
+                        if (UpdatedFields[fieldId].MultipleItemID === childMultipleId) { // check if already got this field children
+                            UpdatedFields[fieldId] = fieldFactory(fieldId, oldVal, extraFieldProps, childMultipleId);
+                            return;
+                        }
+                        var fieldObjCopy = angular.copy(UpdatedFields[fieldId]); // create a copy of the plain field object
+                        UpdatedFields[fieldId] = [ // create the list for the field object
+                            fieldObjCopy,
+                            fieldFactory(fieldId, oldVal, extraFieldProps, childMultipleId)
+                        ];
+                    }
+                    else {
+                        UpdatedFields[fieldId] = fieldFactory(fieldId, oldVal, extraFieldProps);
+                    }
+                }
+            }
+            else {
+                // if theres multiple Child id -> need to build a list instead of regular object
+                if (childMultipleId) {
+                    UpdatedFields[fieldId] = [ // create the list for the field object
+                        fieldFactory(fieldId, oldVal, extraFieldProps, childMultipleId)
+                    ];
+                }
+                else {
+                    UpdatedFields[fieldId] = fieldFactory(fieldId, oldVal, extraFieldProps, childMultipleId);
+                }
+            }
+        }
+
+        // create field and returns it
+        function fieldFactory(fieldId, oldVal, extraFieldProps, childMultipleId) {
+
+            var tempObj = {
+                FieldID: fieldId, // assign field id
+                MultipleItemID: childMultipleId ? childMultipleId : null, // assign child multiple id
+                OldValue: oldVal ? oldVal : '' // assign old value
+            }
+
+            if (extraFieldProps) { // if got extra details
+                tempObj['IsApproved'] = extraFieldProps.IsApproved;
+                tempObj['IsEdited'] = extraFieldProps.IsEdited;
+                tempObj['HasRemark'] = extraFieldProps.HasRemark;
+            }
+            else {
+                tempObj['IsApproved'] = false;
+                tempObj['IsRelevant'] = true;
+            }
+            return tempObj;
+        }
+
+        // Return the amount of fields in the fields object
+        function getFieldsCount() {
+            var counter = 0;
+            for (var field in UpdatedFields) {
+                if (UpdatedFields[field].constructor === Array) { // dig into the lists
+                    for (var i = 0; i < UpdatedFields[field].length; i++) {
+                        counter++;
+                    }
+                }
+                else
+                    counter++;
+            }
+            return counter;
+        }
+
+        // Deleting a field from the updated fields object
+        function deleteFieldUpdatedFields(fieldId, childIndex) {
+            if (UpdatedFields.hasOwnProperty(fieldId)) {
+                if (childIndex >= 0) {
+                    UpdatedFields[fieldId][childIndex] = null;
+                    if (UpdatedFields[fieldId].every(isNull)) // check if all fields are null to delete the whole field
+                        delete UpdatedFields[fieldId];
+                }
+                else
+                    if (UpdatedFields[fieldId])
+                        delete UpdatedFields[fieldId];
+
+                function isNull(elem) { // callback to check if null
+                    return elem ? false : true;
+                }
+            }
+        }
+
+        // Get a specific field by child multiple ID
+        function getFieldUpdatedFieldsByChildMultipleId(fieldId, childMultipleId) {
+
+            for (var field in UpdatedFields) {
+                if (UpdatedFields[field].constructor === Array) { // dig into the lists
+                    for (var i = 0; i < UpdatedFields[field].length; i++) {
+                        if (UpdatedFields[field][i].hasOwnProperty(childMultipleId)) // check if got the id
+                            return UpdatedFields[field][i];
+                    }
+                }
+            }
+
+            return null; // no field with this id has found
+        }
+    }
+
+    UpdatedFieldsManager.$inject = injectParams;
+    angularAMD.service('UpdatedFieldsManager', UpdatedFieldsManager);
+});

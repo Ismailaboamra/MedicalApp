@@ -1,0 +1,16 @@
+define(['app',
+        'directives/bc-dropdown-validator'
+       ], function (app) {
+    'use strict'
+
+    var injectParams = [];
+    var bcChildField = function(){
+        return {
+            restrict: 'E',
+            templateUrl: 'templates/components/fields/childField.html',
+        };
+    }
+
+    bcChildField.$inject = injectParams;
+    app.directive('bcChildField', bcChildField);
+});

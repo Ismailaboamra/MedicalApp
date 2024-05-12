@@ -1,0 +1,88 @@
+define(['angularAMD',
+'StudentInfo',
+'GlobalVariables',
+'GlobalMethods',
+'FieldsEnumConstant',
+'ResponseHandler',
+'GlobalRegexes',
+'ModalManager',
+'DataService',
+'UpdatedFieldsManager'],
+function (angularAMD) {
+'use strict';
+
+var injectParams = ['$rootScope', '$state', 'ModalManager', 'StudentInfo', '$timeout', '$window', 'GlobalMethods', 'DataService', 'GlobalVariables'];
+var RootCtrl = function ($rootScope, $state, ModalManager, StudentInfo, $timeout, $window, GlobalMethods, DataService, GlobalVariables) {
+
+    var vm = this;
+
+    vm.$state = $state;
+    vm.isAuthenticated = isAuthenticated;
+    vm.openModal = openModal;
+    vm.redirectToLogin = GlobalMethods.redirectToLogin;
+
+    vm.studentInfo = {};
+    vm.menuToggle = false;
+    vm.isRequestActive = false;
+
+    vm.studentAccountLink = GlobalVariables.studentAccountLink;
+
+    function isAuthenticated() {
+        return StudentInfo.isAuthenticated();
+    }
+
+    function openModal(modalComponent, title, body, image) {
+        ModalManager.showModal(modalComponent, title, body, image);
+    }
+
+    function annotatedStateObject(state, $current) {
+        state = _.extend({}, state);
+        var resolveData = $current.locals.resolve.$$values;
+        state.params = resolveData.$stateParams;
+        state.resolve = _.omit(resolveData, '$stateParams');
+        state.includes = $current.includes;
+        return state;
+    }
+
+    $rootScope.$on('updateHeaderInfo', function (event, data) {
+        vm.studentInfo = data;
+    });
+
+    /*$rootScope.$on('isRequestActive', function (event, data) {
+        vm.isRequestActive = data;
+    });*/
+
+    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+        //On state change, scroll page to top
+        $window.scrollTo(0, 0);
+
+        //Close menu
+        vm.menuToggle = false;
+
+        //Focus the page header when the page has been routed to - FOR ACCESSIBILITY PURPOSES (Screen readers)
+        $timeout(function () {
+            $('h1').focus();
+        }, 0, false);
+    });
+
+    //prevent from redirecting when got error from service
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
+        toState = annotatedStateObject(toState, $state.$current);
+
+        var resolvedObjects = toState.resolve;
+
+        for (var resolvedObject in resolvedObjects) {
+            for (var property in resolvedObjects[resolvedObject]) {
+                if (resolvedObjects[resolvedObject].data
+                    && !resolvedObjects[resolvedObject].data.Success){
+                        $state.go('Login');
+                        ModalManager.showModal('Error_Modal');
+                        return;
+                }
+            }
+        }
+    })
+}
+RootCtrl.$inject = injectParams;
+angularAMD.controller('RootCtrl', RootCtrl);
+});

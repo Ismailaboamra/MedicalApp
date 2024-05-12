@@ -1,0 +1,19 @@
+define([
+    'app'
+], function (app) {
+    'use strict';
+
+    var injectParams = [];
+    var bcVSign = function () {
+        return {
+            restrict: 'E',
+            scope: {
+                imgPath: '@'
+            },
+            templateUrl: 'templates/components/vSign.html'
+        }
+    }
+
+    bcVSign.$inject = injectParams;
+    app.directive('bcVSign', bcVSign);
+});

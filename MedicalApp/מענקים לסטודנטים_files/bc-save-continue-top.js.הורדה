@@ -1,0 +1,14 @@
+define(['app'], function (app) {
+    'use strict'
+
+    var injectParams = [];
+    var bcSaveContinueTop = function(){
+        return {
+            restrict: 'E',
+            templateUrl: 'templates/components/SaveAndContinueTop.html'
+        };
+    }
+
+    bcSaveContinueTop.$inject = injectParams;
+    app.directive('bcSaveContinueTop', bcSaveContinueTop);
+});

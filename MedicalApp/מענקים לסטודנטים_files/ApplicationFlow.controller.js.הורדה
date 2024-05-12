@@ -1,0 +1,29 @@
+define(['app'], function (app) {
+    'use strict';
+
+    var injectParams = ['$scope', 'GlobalMethods', 'GlobalVariables', 'StudentInfo'];
+    var ApplicationFlowCtrl = function ($scope, GlobalMethods, GlobalVariables, StudentInfo) {
+
+        var vm = this;
+
+        vm.navbarObj = GlobalVariables.navbarObj;
+
+        vm.studentRequestInfo = StudentInfo.getStudentRequestInfo();
+        vm.rejectReasons = vm.studentRequestInfo.RejectReasons ? vm.studentRequestInfo.RejectReasons: null;
+        vm.studentInfo = StudentInfo.getStudentInfo();
+        vm.appealMaxDate = vm.studentRequestInfo.RequestLastAppealDate;
+
+        vm.redirectToField = GlobalMethods.redirectToField;
+        vm.isMeettingTheCondition = GlobalMethods.isMeettingTheCondition;
+        vm.isContains = GlobalMethods.isContains;
+        vm.goBack = GlobalMethods.goBack;
+
+        $scope.$on('RequestDetailsUpdated', function (event, updatedRequestDetails) {
+            StudentInfo.setStudentRequestInfo(updatedRequestDetails);
+            vm.studentRequestInfo = StudentInfo.getStudentRequestInfo();
+        });
+    }
+
+    ApplicationFlowCtrl.$inject = injectParams;
+    app.controller('ApplicationFlowCtrl', ApplicationFlowCtrl);
+});

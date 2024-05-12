@@ -1,0 +1,81 @@
+define([
+  'app',
+  'directives/bc-page-fields',
+  'directives/bc-dropzone',
+  'directives/bc-prevent-copy-cut-paste',
+  'directives/bc-compare-to',
+  'easyticker',
+], function (app) {
+  'use strict';
+
+  var injectParams = [
+    'StudentInfo',
+    'pageDataObj',
+    '$log',
+    'ModalManager',
+    'GlobalVariables',
+    '$scope',
+    'GlobalMethods',
+  ];
+  var LoginCtrl = function (
+    StudentInfo,
+    pageDataObj,
+    $log,
+    ModalManager,
+    GlobalVariables,
+    $scope,
+    GlobalMethods
+  ) {
+    var vm = this;
+
+    var pageDataObj = {
+      RequestApplicableDates:
+        pageDataObj.GetRequestApplicableDates.data.Payload
+          .RequestApplicableDates,
+      StudentNews: pageDataObj.StudentNews,
+    };
+
+    vm.onModal = onModal;
+
+    function onModal(modalType) {
+      ModalManager.showModal(modalType);
+    }
+
+    document.onkeyup = function (e) {
+      if (e.ctrlKey && e.altKey && e.which == 82) {
+        // registration - ctrl + alt + r
+        onModal('Registration_Modal');
+      } else if (e.ctrlKey && e.altKey && e.which == 83) {
+        // login - ctrl + alt + s
+        GlobalMethods.redirectToLogin();
+      }
+    };
+
+    //        $scope.$emit('isRequestActive', pageDataObj.RequestApplicableDates.IsRequestActive);
+
+    vm.pageObject = {
+      isDebugMode: GlobalVariables.isDebugMode,
+      RequestStartDate: pageDataObj.RequestApplicableDates.RequestStartDate,
+      RequestEndDate: pageDataObj.RequestApplicableDates.RequestEndDate,
+      IsRequestActive: pageDataObj.RequestApplicableDates.IsRequestActive,
+      RequestDateHebrew: pageDataObj.RequestApplicableDates.RequestDateHebrew,
+      RequestHebrewDayOfWeek:
+        pageDataObj.RequestApplicableDates.RequestHebrewDayOfWeek,
+      RequestYearHebrew: pageDataObj.RequestApplicableDates.RequestYearHebrew,
+      RequestLastRegistrationDate:
+        pageDataObj.RequestApplicableDates.RequestLastRegistrationDate,
+      StudentNews: pageDataObj.StudentNews,
+    };
+
+    setTimeout(function () {
+      if (vm.pageObject.StudentNews.length > 1) {
+        $('.vticker').easyTicker({ height: 202 });
+      }
+    }, 50);
+
+    $log.debug('pageObject', vm.pageObject);
+  };
+
+  LoginCtrl.$inject = injectParams;
+  app.controller('LoginCtrl', LoginCtrl);
+});

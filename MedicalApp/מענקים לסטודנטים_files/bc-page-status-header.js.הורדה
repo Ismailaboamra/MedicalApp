@@ -1,0 +1,13 @@
+define(['app'], function (app) {
+    'use strict'
+
+    var injectParams = [];
+    var bcPageStatusHeader = function(){
+        return {
+            restrict: 'E',
+            templateUrl: 'templates/components/pageStatusHeader.html',
+        };
+    }
+    bcPageStatusHeader.$inject = injectParams;
+    app.directive('bcPageStatusHeader', bcPageStatusHeader);
+});

@@ -1,0 +1,59 @@
+define([], function () {
+    return function ($rootScope, GlobalMethods, GlobalVariables, $log, StudentInfo, DataService, ResponseHandler, $location, $cookies, ModalManager) {
+
+        //SystemCheck
+        DataService.SystemCheck()
+            .then(function (res) {
+                if (!res.data.Success) ResponseHandler.errorHandler(res);
+                else {
+
+                    if (!GlobalVariables.isDebugMode) {
+
+                        var authParamValue = $location.search().auth;
+
+                        if (authParamValue) {
+                            var authCookie = $cookies.get('auth');
+
+                            if (authCookie != null) {
+                                var parsedAuthCookie = GlobalMethods.QueryStringToJSON(authCookie);
+
+                                if (parsedAuthCookie.Success == "True") {
+                                    StudentInfo.setStudentInfo({
+                                        SSN: parsedAuthCookie.SSN,
+                                        UserToken: parsedAuthCookie.UserToken
+                                    });
+
+                                    GlobalMethods.redirect('ApplicationFlow.Overview');
+                                } else {
+                                    switch (parsedAuthCookie.Error_Description) {
+                                        case "10091":
+                                            ModalManager.showModal('Error_Modal', { body: "שלום רב, פרטי הסטודנט אינם מופיעים במערכת.מצב זה ייתכן במידה ולא בוצעה הרשמה / טרם חלפו 10 ימי עסקים מהמועד בו בוצע הרישום. במידה וחלפו יותר מ10 ימי עסקים ממועד ביצוע הרישום הראשוני למערכת , יש לפנות לבירור מול מוקד התמיכה בטלפון: 1700-505885." });
+                                            break;
+                                        default:
+                                            ModalManager.showModal('Error_Modal', { body: 'אירעה שגיאת מערכת, אנא נסה/י שנית מאוחר יותר.' });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $log.debug('systemCheck', 'SUCCESS');
+                }
+            })
+
+        if (!GlobalVariables.isDebugMode) {
+            $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+                try {
+                    if (toState.requiresLogin) {
+                        if (!StudentInfo.isAuthenticated()) {
+                            GlobalMethods.redirect('Login');
+                            event.preventDefault();
+                        }
+                    }
+                } catch (ex) {
+                    console.error(ex.message);
+                }
+
+            });
+        }
+    }
+});

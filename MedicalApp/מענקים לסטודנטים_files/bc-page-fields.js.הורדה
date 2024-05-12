@@ -1,0 +1,473 @@
+define([
+  'app',
+  'directives/bc-parent-field',
+  'directives/bc-save-continue-top',
+  'directives/bc-save-continue-bottom',
+  'directives/bc-page-status-header',
+  'directives/bc-clear-model',
+  //'directives/bc-dropzone' TODO:delete
+], function (app) {
+  'use strict';
+
+  var injectParams = [
+    '$rootScope',
+    'GlobalVariables',
+    'DataService',
+    'GlobalMethods',
+    'toastr',
+    '$log',
+    'StudentInfo',
+    'ResponseHandler',
+    'ModalManager',
+  ];
+  var bcPageFields = function (
+    $rootScope,
+    GlobalVariables,
+    DataService,
+    GlobalMethods,
+    toastr,
+    $log,
+    StudentInfo,
+    ResponseHandler,
+    ModalManager
+  ) {
+    return {
+      restrict: 'E',
+      templateUrl: 'templates/components/fields/pageFields.html',
+      priority: 90,
+      scope: {
+        fieldToScroll: '@',
+        componentObject: '=',
+        pageObject: '=',
+        pageTitle: '@',
+        pageErrorObject: '=',
+        documentAttachmentsObject: '=',
+        goBack: '=',
+        onModal: '=',
+        pageStatusHeader: '=',
+        filedsPropList: '=',
+      },
+      controllerAs: 'pageFieldsCtrl',
+      controller: [
+        '$scope',
+        function ($scope) {
+          var vm = this;
+
+          var selectedCity = '';
+          var selectedMajor = '';
+
+          vm.getColClass = getColClass;
+
+          vm.datepickerOptions = GlobalVariables.datepickerOptions;
+
+          vm.dateFormat = GlobalMethods.formatDate;
+          vm.createGuid = GlobalMethods.createGuid;
+          vm.createSimpleArray = GlobalMethods.createSimpleArray;
+
+          var requestStatus = StudentInfo.getStudentRequestInfo().RequestStatus;
+          vm.requestStatus = requestStatus;
+          var requestTotalDays =
+            StudentInfo.getStudentRequestInfo().DaysLeftForApplying;
+          var canSendRequest =
+            StudentInfo.getStudentRequestInfo().CanSendRequest;
+          var isRequestReadOnly =
+            StudentInfo.getStudentRequestInfo().IsRequestReadOnly;
+          vm.isDisabled = !canSendRequest;
+
+          vm.GetCities = GetCities;
+          vm.GetStreets = GetStreets;
+
+          vm.GetMajors = GetMajors;
+          vm.GetMinors = GetMinors;
+
+          vm.onTypeAheadSelect = onTypeAheadSelect;
+          vm.onMajorSelect = onMajorSelect;
+          vm.initDefaultValueTypeAheadCity = initDefaultValueTypeAheadCity;
+          vm.initDefaultValueMajor = initDefaultValueMajor;
+
+          vm.submitPageForm = submitPageForm;
+
+          vm.sendAttachmentObject = sendAttachmentObject;
+          vm.checkIfFieldDisabled = checkIfFieldDisabled;
+          vm.takeFieldValue = takeFieldValue;
+          vm.fieldValueChanged = fieldValueChanged;
+
+          GlobalMethods.scrollToAnchor($scope.fieldToScroll);
+
+          var childrenSiblingChanged = false;
+
+          // Set a special disable term to a field
+          function addSpecialDisableTerm(field) {
+            if (field) field.newDisableTerm = false;
+          }
+
+          // Listen to fields value changes (we needed a way to know the user interact with the fieds)
+          function fieldValueChanged(fieldJson, fiedModelData, index) {
+            // this field are for the amount childrens and siblings, and theres no need to track their changes for now
+            if (fieldJson.fieldId == 1023 || fieldJson.fieldId == 1042) return;
+
+            var data = GlobalMethods.getFieldData(fiedModelData, index);
+
+            if ($scope.filedsPropList[fieldJson.fieldId]) {
+              if ($scope.filedsPropList[fieldJson.fieldId].OldValue) {
+                // has old value (the old value is picked only for fields with remarks)
+                if (
+                  $scope.filedsPropList[fieldJson.fieldId].OldValue !== data
+                ) {
+                  // if value changed means the user interact with the website
+                  GlobalMethods.runOverfieldChilds(
+                    fieldJson,
+                    fiedModelData.Code,
+                    addSpecialDisableTerm
+                  );
+                }
+
+                childrenSiblingChanged =
+                  fieldJson.fieldId == 1022 &&
+                  $scope.filedsPropList[fieldJson.fieldId].OldValue !== data;
+              } else if (
+                $scope.filedsPropList[fieldJson.fieldId][index] &&
+                $scope.filedsPropList[fieldJson.fieldId][index].OldValue
+              ) {
+                // has old value (the old value is picked only for fields with remarks)
+                if (
+                  $scope.filedsPropList[fieldJson.fieldId][index].OldValue !==
+                  data
+                ) {
+                  // if value changed means the user interact with the website
+                  GlobalMethods.runOverfieldChilds(
+                    fieldJson,
+                    fiedModelData.Code,
+                    addSpecialDisableTerm
+                  );
+                }
+              }
+            }
+          }
+
+          // Take values from the form fields
+          function takeFieldValue(fieldId, fieldData, index) {
+            var data = GlobalMethods.getFieldData(fieldData, index);
+            if (!isNaN(index)) {
+              // if got index means its a multiple child
+              if (
+                $scope.filedsPropList[fieldId] &&
+                $scope.filedsPropList[fieldId][index]
+              ) {
+                $scope.filedsPropList[fieldId][index]['OldValue'] = data;
+              }
+            } else {
+              if ($scope.filedsPropList[fieldId]) {
+                $scope.filedsPropList[fieldId]['OldValue'] = data;
+              }
+            }
+          }
+
+          // Check if the request status is allowed form changing
+          function isStatusAllowedFormChanging() {
+            // statuses under student
+            return requestStatus == 0 || requestStatus == 11;
+          }
+
+          // Check which fields are disabled (kablan marked for)
+          function checkIfFieldDisabled(field, fieldData, index) {
+            if (requestStatus == 0) {
+              return false;
+            } else if (requestStatus != 11 && requestStatus != 0) {
+              return true;
+            }
+
+            // it was decided that if field 2006 has remark without approval all the that will be reamraked without
+            // approvals to make all the tab in the student site open for changes
+            if (
+              $scope.filedsPropList['2006'] &&
+              $scope.filedsPropList['2006'].HasRemark &&
+              !$scope.filedsPropList['2006'].IsApproved
+            ) {
+              var fieldNumber = parseInt(field.fieldId);
+              if (fieldNumber > 2000 && fieldNumber < 3000) {
+                return false;
+              }
+            }
+
+            // check if childern changed to sibling and reveresd to know if to take in count the index
+            if (childrenSiblingChanged) {
+              if (typeof index == 'number') {
+                return false;
+              }
+            }
+
+            if (
+              !isNaN(index) &&
+              index >= $scope.filedsPropList.amountOfDuplicates
+            ) {
+              return false;
+            }
+
+            if (field.hasOwnProperty('newDisableTerm')) {
+              return field.newDisableTerm;
+            }
+
+            if (!isNaN(index)) {
+              // if got index means its a multiple child
+              if (
+                $scope.filedsPropList[field.fieldId] &&
+                $scope.filedsPropList[field.fieldId][index]
+              ) {
+                if ($scope.filedsPropList[field.fieldId][index].IsApproved) {
+                  return true;
+                } else {
+                  if (
+                    $scope.filedsPropList[field.fieldId][index].HasRemark ==
+                    undefined
+                  ) {
+                    return false;
+                  } else {
+                    return !$scope.filedsPropList[field.fieldId][index]
+                      .HasRemark;
+                  }
+                }
+              } else {
+                return true;
+              }
+            } else {
+              if ($scope.filedsPropList[field.fieldId]) {
+                if ($scope.filedsPropList[field.fieldId].IsApproved) {
+                  return true;
+                } else {
+                  return !$scope.filedsPropList[field.fieldId].HasRemark;
+                }
+              } else {
+                return false;
+              }
+            }
+          }
+
+          function isDynamicFieldsValidation(pageObject) {
+            //if hasChildren and has at least 1 child
+            if (
+              pageObject.HasChildrenAgeUnder21 &&
+              pageObject.HasChildrenAgeUnder21.Code == 1 &&
+              pageObject.NumberOfChildrenAgeUnder21.Code > 0
+            ) {
+              var childrenArray = GlobalMethods.converingToChildObject(
+                pageObject.ChildrenBirthDate,
+                pageObject.ChildrenFirstName,
+                pageObject.ChildrenLastName,
+                pageObject.ChildrenSocialSecurityID,
+                pageObject.ChildrenID,
+                pageObject.ChildDisabilityPercentageDetails,
+                pageObject.NumberOfChildrenAgeUnder21.Code
+              );
+
+              return checkIfArrayIsValid(childrenArray, 1024);
+              //if not hasSiblings and has at least 1 sibling
+            } else if (
+              pageObject.HasChildrenAgeUnder21 &&
+              pageObject.HasChildrenAgeUnder21.Code == 0 &&
+              pageObject.NumberOfSiblings.Code > 0
+            ) {
+              var siblingArray = GlobalMethods.converingToSiblingObject(
+                pageObject.SiblingBirthDate,
+                pageObject.SiblingFirstName,
+                pageObject.SiblingLastName,
+                pageObject.SiblingSocialSecurityID,
+                pageObject.SiblingDisabilityPercentageDetails,
+                pageObject.IsSiblingAStudent,
+                pageObject.SiblingID,
+                pageObject.NumberOfSiblings.Code
+              );
+              return checkIfArrayIsValid(siblingArray, 1044);
+            }
+
+            return {
+              isValid: true,
+              fieldToRedirect: null,
+            };
+          }
+
+          function checkIfArrayIsValid(arrayToCheck, fieldToRedirect) {
+            var itemsValidationArray = [];
+
+            if (arrayToCheck.length == 0)
+              return {
+                isValid: false,
+                fieldToRedirect: fieldToRedirect,
+              };
+
+            for (var i = 0; i < arrayToCheck.length; i++) {
+              var isValid = false;
+              angular.forEach(arrayToCheck[i], function (value, key) {
+                if (key != 'ID') {
+                  if (value) isValid = true;
+                }
+              });
+              if (!isValid)
+                return {
+                  isValid: false,
+                  fieldToRedirect: fieldToRedirect,
+                };
+            }
+
+            return {
+              isValid: true,
+              fieldToRedirect: null,
+            };
+          }
+
+          function submitPageForm(form, pageObject, toRedirect) {
+            if (pageObject.pageName == 'DocumentAttachments') return;
+
+            if (this.isDisabled) return;
+
+            form.$setSubmitted();
+            if (form.$valid) {
+              $log.debug('PageObject', pageObject);
+
+              var dynamicChildValidationObject = isDynamicFieldsValidation(
+                angular.copy(pageObject)
+              );
+
+              if (!dynamicChildValidationObject.isValid) {
+                ModalManager.showModal(
+                  'FieldError_Modal',
+                  dynamicChildValidationObject.fieldToRedirect,
+                  'missing'
+                );
+                return;
+              }
+
+              DataService.Update(pageObject.pageName, pageObject).then(
+                function (res) {
+                  if (!res.data.Success) {
+                    ResponseHandler.errorHandler(res);
+                  } else {
+                    toastr.info(
+                      'תוכל/י לחזור למילוי הפרטים הנוספים בכל עת בעזרת פרטי הכניסה שיש לך.',
+                      'הנתונים נשמרו.'
+                    );
+                    if (toRedirect) GlobalMethods.goNext();
+                  }
+                }
+              );
+            }
+          }
+
+          function sendAttachmentObject(
+            $event,
+            currentObject,
+            documentAttachmentForm,
+            currentDropzone
+          ) {
+            // sets form submitted (no such default functionality for nested forms)
+            if ($($event.currentTarget).hasClass('disabled')) return;
+
+            documentAttachmentForm.$setSubmitted();
+
+            if (!documentAttachmentForm.$valid) return;
+
+            $log.debug('currentObject', currentObject);
+
+            if (currentObject.dropzoneFilesHasChanged) {
+              currentDropzone.processQueue();
+            } else {
+              DataService.UpdateDocumentAttachmentDetails({
+                AttachmentID: currentObject.AttachmentID,
+                AttachmentIssueDate: currentObject.AttachmentIssueDate,
+                AttachmentNotes: currentObject.AttachmentNotes,
+                AttachmentPageCount: currentObject.AttachmentPageCount,
+              }).then(function (res) {
+                if (!res.data.Success) {
+                  ResponseHandler.errorHandler(res);
+                } else {
+                  toastr.info(
+                    'תוכל/י לחזור למילוי הפרטים הנוספים בכל עת בעזרת פרטי הכניסה שיש לך.',
+                    'הנתונים נשמרו.'
+                  );
+                }
+              });
+            }
+          }
+
+          function getColClass(childrens) {
+            return 'col-xs-12 col-sm-' + 12 / childrens.length;
+          }
+
+          function initDefaultValueTypeAheadCity(value) {
+            selectedCity = value;
+          }
+
+          function initDefaultValueMajor(value) {
+            selectedMajor = value;
+          }
+
+          function GetCities(value) {
+            return DataService.GetCities({
+              RequestID: StudentInfo.getStudentRequestID,
+              Prefix: value,
+            }).then(function (res) {
+              if (!res.data.Success) {
+                ResponseHandler.errorHandler(res);
+                return null;
+              } else {
+                $rootScope.$broadcast('clearCityModel', {});
+                return res.data.Payload.lCities;
+              }
+            });
+          }
+
+          function GetMinors(selectedObject) {
+            if (selectedObject.Code)
+              DataService.GetMinors({
+                MajorCode: selectedObject.Code,
+              }).then(function (res) {
+                if (!res.data.Success) {
+                  ResponseHandler.errorHandler(res);
+                } else {
+                  vm.lMinors = res.data.Payload.lMinors;
+                }
+              });
+          }
+
+          function GetMajors(selectedMajor) {
+            DataService.GetMajors().then(function (res) {
+              if (!res.data.Success) {
+                ResponseHandler.errorHandler(res);
+              } else {
+                vm.lMajors = res.data.Payload.lMajors;
+                GetMinors(selectedMajor);
+              }
+            });
+          }
+
+          function GetStreets(Phrase) {
+            if (!!!selectedCity) return;
+
+            return DataService.GetStreets({
+              RequestID: StudentInfo.getStudentRequestID,
+              SEMEL_ISHUV: selectedCity.ISV_SEMEL_ISHUV,
+              Prefix: Phrase,
+            }).then(function (res) {
+              if (!res.data.Success) {
+                ResponseHandler.errorHandler(res);
+              } else {
+                return res.data.Payload.lStreets;
+              }
+            });
+          }
+
+          function onTypeAheadSelect($item, $model, $label) {
+            selectedCity = $item;
+          }
+
+          function onMajorSelect($item, $model, $label) {
+            selectedMajor = $item;
+          }
+        },
+      ],
+    };
+  };
+
+  bcPageFields.$inject = injectParams;
+  app.directive('bcPageFields', bcPageFields);
+});

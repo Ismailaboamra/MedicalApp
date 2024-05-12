@@ -1,0 +1,14 @@
+define(['app','directives/bc-child-field'], function (app) {
+    'use strict'
+
+    var injectParams = [];
+    var bcParentField = function(){
+        return {
+            restrict: 'E',
+            templateUrl: 'templates/components/fields/parentField.html',
+        };
+    }
+
+    bcParentField.$inject = injectParams;
+    app.directive('bcParentField', bcParentField);
+});

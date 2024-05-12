@@ -1,0 +1,162 @@
+define([
+    'app',
+    'directives/bc-request-status-circle',
+    'directives/bc-v-sign',
+], function (app) {
+    'use strict';
+
+    var injectParams = [];
+    var bcRequestStatusBar = function () {
+        return {
+            restrict: 'E',
+            bindToController: {
+                requestStatus: '=',
+                emailSent: '='
+            },
+            templateUrl: 'templates/components/requestStatusBar.html',
+            controllerAs: 'statusbarCtrl',
+            controller: function () {
+                var vm = this;
+                vm.getStageImgPath = getStageImgPath;
+                vm.getVImgPath = getVImgPath;
+                vm.stageCircles = {};
+                vm.statusesObj = {};
+
+                var imgPath = 'images/';
+                var imgStagePath = imgPath + 'ico-stage-';
+                var imgSofix = '.svg';
+
+                init();
+
+                // initizlize
+                function init() {
+                    initStageCircles();
+                    initStatusesObj();
+                }
+
+                /**
+                 * Initizlize the stages circles object
+                 */
+                function initStageCircles() {
+                    vm.stageCircles = {
+                        0: {
+                            itemID: 0,
+                            title: 'מילוי הטופס'
+                        },
+                        1: {
+                            itemID: 1,
+                            title: 'בדיקה ראשונית'
+                        },
+                        2: {
+                            itemID: 2,
+                            title: 'השלמות לטופס'
+                        },
+                        3: {
+                            itemID: 3,
+                            title: 'בדיקת זכאות'
+                        },
+                        4: {
+                            itemID: 4,
+                            title: 'תשובה סופית'
+                        },
+                        5: {
+                            itemID: 5,
+                            title: 'תשלום בתהליך'
+                        }
+                    }
+                }
+
+                /**
+                 * Initizlize the statuses object
+                 * each object is a status who owns (for now) his active circle stage
+                 */
+                function initStatusesObj() {
+                    vm.statusesObj = {
+                        0: {
+                            activeCircle: 0
+                        },
+                        1: {
+                            activeCircle: 1
+                        },
+                        2: {
+                            activeCircle: 3
+                        },
+                        3: {
+                            activeCircle: 4
+                        },
+                        4: {
+                            activeCircle: 4
+                        },
+                        5: {
+                            activeCircle: 1 // no email sent
+                        },
+                        8: {
+                            activeCircle: 1
+                        },
+                        9: {
+                            activeCircle: 1
+                        },
+                        10: {
+                            activeCircle: 5
+                        },
+                        11: {
+                            activeCircle: 2
+                        },
+                        12: {
+                            activeCircle: 2
+                        },
+                        15: {
+                            activeCircle: 4
+                        },
+                        16: {
+                            activeCircle: 4
+                        },
+                        17: {
+                            activeCircle: 2
+                        },
+                        99: {
+                            activeCircle: 2
+                        }
+                    }
+
+                    // check if the request declined and notification email sent to the student
+                    // if it does a different stage(4) should be active
+                    if (vm.requestStatus == 5 && vm.emailSent) {
+                        vm.statusesObj['5'].activeCircle = 4; // email sent
+                    }
+                }
+
+                // Return the stage circle image path
+                function getStageImgPath(itemId) {
+                    var activeState = vm.statusesObj[vm.requestStatus].activeCircle;
+                    if (itemId < activeState) {
+                        return imgStagePath + itemId + '-done' + imgSofix;
+                    }
+                    else if (itemId == activeState) {
+                        return imgStagePath + itemId + '-active' + imgSofix;
+                    }
+                    else {
+                        return imgStagePath + itemId + imgSofix;
+                    }
+                }
+
+                // Return the 'V' image path
+                function getVImgPath(itemId) {
+                    var activeState = vm.statusesObj[vm.requestStatus].activeCircle;
+                    if (itemId < activeState) {
+                        return imgPath + 'v' + imgSofix;
+                    }
+                    else if (itemId == activeState) {
+                        return imgPath + 'v_empty' + imgSofix;
+                    }
+                    else {
+                        return imgPath + 'v_empty' + imgSofix;
+                    }
+                }
+            }
+        }
+    }
+
+    bcRequestStatusBar.$inject = injectParams;
+    app.directive('bcRequestStatusBar', bcRequestStatusBar);
+});

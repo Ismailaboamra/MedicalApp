@@ -1,0 +1,43 @@
+define(['jquery',
+        'angular',
+        'angularAMD',
+        'appConfig',
+        'appRun',
+        'angularRoute',
+        'angularUiRouter',
+        'angularCookies',
+        'angularToastr',
+        'angularAnimate',
+        'angularRecaptcha',
+        'HttpInterceptor',
+        'uiBootstrap',      //FIXME: delete if not use
+        'uiBootstrapTpls',
+        'angularMessages',
+        'angularAria',
+        'angularSanitize',
+        'lodash',
+        'i18nHebrew',
+        'angularTouch',
+        'RootCtrl'], function (jquery, angular, angularAMD, appConfig, appRun) {
+
+    'use strict';
+
+    var app = angular.module('StudentScholarship',
+                             ['ngRoute',
+                              'ui.router',
+                              'ngAnimate',
+                              'ui.bootstrap',
+                              'ngMessages',
+                              'vcRecaptcha',
+                              'toastr',
+                              'ngDialog',
+                              'ngAria',
+                              'ngTouch',
+                              'ngSanitize',
+                              'ngCookies'
+                              ]);
+    //lodash
+    app.config(appConfig).run(appRun).constant('_', window._);
+
+    return angularAMD.bootstrap(app);
+});

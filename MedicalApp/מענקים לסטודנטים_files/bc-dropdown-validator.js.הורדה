@@ -1,0 +1,19 @@
+define(['app'], function (app) {
+    'use strict'
+
+    var injectParams = [];
+    var bcDropdownValidator = function () {
+        return {
+            require: 'ngModel',
+            link: function($scope, $element, $attrs, ngModel) {
+                ngModel.$validators.bcEmptyObject = function bcEmptyObject(modelValue, viewValue) {
+                    var val = modelValue && modelValue.Desc;
+                    return !!val;
+                };
+            }
+        };
+    };
+
+    bcDropdownValidator.$inject = injectParams;
+    app.directive('bcDropdownValidator', bcDropdownValidator);
+});

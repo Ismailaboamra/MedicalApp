@@ -1,0 +1,439 @@
+define(['angularAMD'], function (angularAMD) {
+    'use strict';
+
+    var injectParams = ['$state', '$timeout', '$location', '$anchorScroll', 'FieldsEnumConstant', 'GlobalVariables'];
+    var GlobalMethods = function ($state, $timeout, $location, $anchorScroll, FieldsEnumConstant, GlobalVariables) {
+
+        return {
+            redirect: redirect,
+            arrayOfNumbers: arrayOfNumbers,
+            formatDate: formatDate,
+            createFormatedDatetime: createFormatedDatetime,
+            createBlobAndDisplay: createBlobAndDisplay,
+            parseDateToString: parseDateToString,
+            scrollToAnchor: scrollToAnchor,
+            isMeettingTheCondition: isMeettingTheCondition,
+            redirectToField: redirectToField,
+            createGuid: createGuid,
+            createSimpleArray: createSimpleArray,
+            getFieldObjectFromEnum: getFieldObjectFromEnum,
+            converingToChildObject: converingToChildObject,
+            converingToSiblingObject: converingToSiblingObject,
+            converingToReserveObject: converingToReserveObject,
+            isContains: isContains,
+            goBack: goBack,
+            goNext: goNext,
+            QueryStringToJSON: QueryStringToJSON,
+            getAttachmentByTypeCode: getAttachmentByTypeCode,
+            concatStringWithHyphen: concatStringWithHyphen,
+            redirectToLogin: redirectToLogin,
+            cleanCookie: cleanCookie,
+            getFieldData: getFieldData,
+            runOverfieldChilds: runOverfieldChilds,
+            logout: logout
+        }
+
+        // cleaning client cookies
+        function cleanCookie(key) {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var eqPos = cookies[i].indexOf('=');
+                var name = cookies[i].substr(0, eqPos);
+                name = name.replace(' ', '');
+                if (name == key) {
+                    document.cookie = name + '=; Max-Age=0; domain=.' + location.host;
+                }
+            }
+        }
+
+        // Logout
+        function logout(){
+            location.href = location.origin + '/api/Halvaot/Logout';
+        }
+        
+        // Redirect to login
+        function redirectToLogin() {
+            location.href = GlobalVariables.authenticationURL;
+        }
+
+        // Loop through all field's childs and make an action
+        function runOverfieldChilds(field, specificOption, callBack) {
+
+            if (field.dynamicFields) {
+                if (field.dynamicFields.options) { // id got inner fields as options fields
+                    if (!isNaN(specificOption) && specificOption != null) { // if to open all child fields or just a specific one
+                        if (field.dynamicFields.options.constructor == Array) {
+                            for (var i = 0; i < field.dynamicFields.options[specificOption].length; i++) {
+                                runOverfieldChilds(field.dynamicFields.options[specificOption][innerField], null, callBack);
+                            }
+                        }
+                        else {
+                            for (var innerField in field.dynamicFields.options[specificOption]) { // loop thourgh the inner fields
+                                runOverfieldChilds(field.dynamicFields.options[specificOption][innerField], null, callBack);
+                            }
+                        }
+                    }
+                    else {
+                        for (var option in field.dynamicFields.options) {
+                            if (field.dynamicFields.options.constructor == Array) {
+                                option = parseInt(field.dynamicFields.options[option]);
+                            }
+                            for (var innerField in field.dynamicFields.options[option]) { // loop thourgh the inner fields
+                                runOverfieldChilds(field.dynamicFields.options[option][innerField], null, callBack);
+                            }
+                        }
+                    }
+                }
+            }
+            callBack(field);
+        }
+
+        // Retrieve field data by its type
+        function getFieldData(fieldData, index) {
+            if (!fieldData) return fieldData;
+            var rawData = fieldData.constructor == Array ? fieldData[index] : fieldData;
+
+            if (rawData !== null && typeof rawData === 'object') { // if the data is an object
+                if (fieldData.hasOwnProperty('ISV_SHEM_ISHUV')) { // for cities
+                    return rawData.ISV_SHEM_ISHUV;
+                }
+                else if (fieldData.hasOwnProperty('SHEM_RECHOV')) { // for streets
+                    return rawData.SHEM_RECHOV;
+                }
+                else if (rawData.hasOwnProperty('Desc')) { // if the object keeps the data in Desc prop
+                    return rawData.Desc;
+                }
+                else { // flat data
+                    return rawData;
+                }
+            }
+            else { // flat data
+                return rawData;
+            }
+        }
+
+        // Adds a hyphen divider between 2 strings 
+        function concatStringWithHyphen(strOne, strTwo) {
+            return strOne + ' - ' + strTwo;
+        }
+
+        // Return attachment by code
+        function getAttachmentByTypeCode(attachmentsList, code) {
+            for (var i = 0; i < attachmentsList.length; i++) {
+                if (attachmentsList[i].AttachmentTypeCode == code) {
+                    return attachmentsList[i];
+                }
+            }
+        }
+
+        function createFormatedDatetime() {
+            var now = new Date();
+            var year = "" + now.getFullYear();
+            var month = "" + (now.getMonth() + 1); if (month.length == 1) { month = "0" + month; };
+            var day = "" + now.getDate(); if (day.length == 1) { day = "0" + day; }
+            var hour = "" + now.getHours(); if (hour.length == 1) { hour = "0" + hour; }
+            var minute = "" + now.getMinutes(); if (minute.length == 1) { minute = "0" + minute; }
+            var second = "" + now.getSeconds(); if (second.length == 1) { second = "0" + second; }
+            var mili = "" + now.getMilliseconds(); if (mili.length == 1) { mili = "0" + second; }
+            return day + month + year + hour + minute + second + mili;
+        }
+
+        function isContains(array, item) {
+            return array.indexOf(item) != -1;
+        }
+
+        function createSimpleArray(value) {
+            return new Array(parseInt(value, 10));
+        }
+
+        function goBack() {
+            var statesArray = $state.get();
+            var currentPage = $state.$current.self.name; //"ApplicationFlow.PersonalDetails"
+
+            for (var i = 0; i < statesArray.length; i++) {
+                if (statesArray[i].name == currentPage) {
+                    redirect(statesArray[i - 1].name, {});
+                    break;
+                }
+            }
+        }
+
+        function goNext() {
+            var statesArray = $state.get();
+            var currentPage = $state.$current.self.name; //"ApplicationFlow.PersonalDetails"
+
+            for (var i = 0; i < statesArray.length - 1; i++) {
+                if (statesArray[i].name == currentPage) {
+                    redirect(statesArray[i + 1].name, {});
+                    break;
+                }
+            }
+        }
+
+        function createGuid() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function isMeettingTheCondition(itemID, condition, currentRequestStatus) {
+            var conditionsObj = {
+                0: {
+                    less: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 99],
+                    equals: [0, 6],
+                    greater: []
+                },
+                1: {
+                    less: [2, 3, 4, 5, 7, 10, 11, 14, 17, 99],
+                    equals: [1, 8, 12, 13, 9, 15, 16],
+                    greater: [0, 6]
+                },
+                2: {
+                    less: [2, 3, 4, 5, 7, 10, 14, 99],
+                    equals: [11, 17],
+                    greater: [0, 1, 6, 8, 9, 12, 13, 15, 16]
+                },
+                3: {
+                    less: [3, 4, 5, 7, 10],
+                    equals: [2, 14, 99],
+                    greater: [0, 1, 6, 8, 9, 11, 12, 13, 15, 16, 17]
+                },
+                4: {
+                    less: [10],
+                    equals: [3, 4, 5, 7],
+                    greater: [0, 1, 2, 6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 99]
+                },
+                5: {
+                    less: [],
+                    equals: [10],
+                    greater: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 99]
+                }
+            }
+
+            return conditionsObj[itemID][condition].indexOf(currentRequestStatus) != -1
+        }
+
+        function converingToSiblingObject(SiblingBirthDate, SiblingFirstName, SiblingLastName, SiblingSocialSecurityID,
+            SiblingDisabilityPercentageDetails, IsSiblingAStudent, SiblingID, NumberOfSiblings) {
+            //convert the startDateArray to ms dateTime
+            _.forEach(SiblingBirthDate, function (value, index) {
+                SiblingBirthDate[index] = value && '/Date(' + new Date(value).getTime() + '+0200)/'
+            });
+
+            var mapped = _.zip(SiblingBirthDate,
+                SiblingID,
+                SiblingFirstName,
+                SiblingLastName,
+                SiblingSocialSecurityID,
+                SiblingDisabilityPercentageDetails,
+                IsSiblingAStudent)
+
+            var arr = [];
+            var counter = 1;
+
+            _.forEach(mapped, function (item) {
+                //to avoid extra items to be send to service
+                if (counter <= NumberOfSiblings)
+                    arr.push(_.zipObject(['BirthDate', 'ID', 'FirstName', 'LastName', 'SocialSecurityID', 'DisabilityPercentageDetails', 'IsSiblingAStudent'], item))
+
+                counter++
+            });
+
+            return arr;
+        }
+
+        function converingToChildObject(ChildrenBirthDate, ChildrenFirstName, ChildrenLastName, ChildrenSocialSecurityID, ChildDisabilityPercentageDetails, ChildrenID, NumberOfChildren) {
+            //convert the startDateArray to ms dateTime
+            _.forEach(ChildrenBirthDate, function (value, index) {
+                ChildrenBirthDate[index] = value && '/Date(' + new Date(value).getTime() + '+0200)/'
+            });
+
+            //create array of objects from 3 arrays
+            var mapped = _.zip(ChildrenBirthDate,
+                ChildrenID,
+                ChildrenFirstName,
+                ChildrenLastName,
+                ChildDisabilityPercentageDetails,
+                ChildrenSocialSecurityID)
+
+            var arr = [];
+            var counter = 1;
+
+            _.forEach(mapped, function (item) {
+                //to avoid extra items to be send to service
+                if (counter <= NumberOfChildren)
+                    arr.push(_.zipObject(['BirthDate', 'ID', 'FirstName', 'LastName', 'DisabilityPercentageDetails', 'SocialSecurityID'], item))
+
+                counter++
+            });
+
+            return arr;
+        }
+
+        function converingToReserveObject(startDateArray, endDateArray, IDFReserveID) {
+            //convert the startDateArray to ms dateTime
+            _.forEach(startDateArray, function (value, index) {
+                startDateArray[index] = value && '/Date(' + new Date(value).getTime() + '+0200)/'
+            });
+
+            //convert the endDateArray to ms dateTime
+            _.forEach(endDateArray, function (value, index) {
+                endDateArray[index] = value && '/Date(' + new Date(value).getTime() + '+0200)/'
+            });
+
+            //create array of objects from 3 arrays
+            var mapped = _.zip(startDateArray,
+                IDFReserveID,
+                endDateArray)
+
+            var arr = [];
+
+            _.forEach(mapped, function (item) {
+                //create objects properties
+                arr.push(_.zipObject(['StartDate', 'ID', 'EndDate'], item))
+            });
+
+
+            return arr;
+        }
+
+        function redirect(stateName, params) {
+            if ($state.current.name == stateName) {
+                scrollToAnchor(params.fieldId);
+            } else {
+                $state.go(stateName, params);
+            }
+        }
+
+        function getFieldObjectFromEnum(FieldRef) {
+            var pageNum = Math.floor(FieldRef / 1000) * 1000;
+            var pageName = FieldsEnumConstant.pagesEnums[pageNum];
+            return FieldsEnumConstant[pageNum][FieldRef];
+        }
+
+        function redirectToField(FieldRef) {
+            if (!!!FieldRef) return;
+            var pageNum = Math.floor(FieldRef / 1000) * 1000;
+            var pageName = FieldsEnumConstant.pagesEnums[pageNum];
+            var fieldDesc = FieldsEnumConstant[pageNum][FieldRef].desc
+            redirect(pageName, { fieldId: fieldDesc });
+        }
+
+        function scrollToAnchor(elementId) {
+            if (!!elementId) {
+                $timeout(function () {
+                    var old = $location.hash();
+                    $location.hash(elementId);
+                    $anchorScroll();
+                    $location.hash(old);
+                }, 1500)
+            }
+        }
+
+        function arrayOfNumbers(startNumber, endNumber) {
+            var arrayOfNumbers = [];
+
+            for (var i = startNumber; i <= endNumber; i++)
+                arrayOfNumbers.push({
+                    Desc: i,
+                    Code: i
+                })
+
+            return arrayOfNumbers;
+        }
+
+        function formatDate(dateTime) {
+            if (!dateTime) return;
+            try {
+                var date = new Date(dateTime);
+            } catch (ex) { }
+            return date;
+        }
+
+        function isMobileSafari() {
+            return navigator.userAgent.match(/(iPod|iPhone|iPad)/)
+                && navigator.userAgent.match(/AppleWebKit/);
+        }
+
+        function isIEBrowser() {
+            return window.navigator.msSaveBlob != undefined;
+        }
+
+        function parseDateToString(date) {
+            var date = new Date(date);
+            var day = date.getDate();
+            var monthIndex = date.getMonth();
+            var year = date.getFullYear();
+
+            return day + '/' + ++monthIndex + '/' + year
+        }
+
+        function createBlobAndDisplay(FileData, FileExtension, FileMimeType) {
+            try {
+                var base64Decoded,
+                    byteNumbers,
+                    byteArray;
+
+                base64Decoded = atob(FileData);
+                byteNumbers = new Array(base64Decoded.length);
+
+                for (var i = 0; i < base64Decoded.length; i++) {
+                    byteNumbers[i] = base64Decoded.charCodeAt(i);
+                }
+
+                byteArray = new Uint8Array(byteNumbers);
+
+                if (isIEBrowser()) {
+                    var blobObject = new MSBlobBuilder();
+                    blobObject.append(byteArray);
+
+                    window.navigator.msSaveBlob(blobObject.getBlob(FileMimeType), 'document' + FileExtension);
+
+                    return;
+                };
+
+                var a = window.document.createElement('a');
+                a.download = 'document' + FileExtension;
+                a.href = window.URL.createObjectURL(new Blob([byteArray], {
+                    type: FileMimeType
+                }));
+
+                if (isMobileSafari()) {
+                    /*var obj = {};
+                    obj.UserToken = UserInfo.getUserToken();
+                    obj.UserInfo = UserInfo.getUserInfo();
+                    obj.UserGUID = UserInfo.getUserGUID();
+                    obj.LastState = $state.current.name;
+    
+                    localStorage.setItem('PDFState', JSON.stringify(obj));*/
+
+                    window.location.href = a.href;
+                } else {
+                    window.document.body.appendChild(a);
+                    a.click();
+                };
+
+                window.document.body.removeChild(a)
+            } catch (ex) {
+                console.error(ex.message);
+            }
+        }
+
+        function QueryStringToJSON(query) {
+            var pairs = query.split('&');
+
+            var result = {};
+            pairs.forEach(function (pair) {
+                pair = pair.split('=');
+                result[pair[0]] = decodeURIComponent(pair[1].replace(/\+/g, '%20') || '');
+            });
+
+            return JSON.parse(JSON.stringify(result));
+        }
+    }
+
+    GlobalMethods.$inject = injectParams;
+    angularAMD.factory('GlobalMethods', GlobalMethods);
+});
